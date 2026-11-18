@@ -15,11 +15,12 @@ import {
 import { createTraffic, updateTraffic } from './traffic.js';
 import { createPeds, dropDriver, updatePeds } from './peds.js';
 import { createWanted, reportCrime, setWantedStars, updateWanted } from './wanted.js';
-import { createPolice, policeRoster, stagePolice, updatePolice } from './police.js';
+import { createPolice, policeRoster, updatePolice } from './police.js';
 import { createCombat, hurtPlayer, updateCombat } from './combat.js';
 import { createDialogue, say as sayLine, updateDialogue } from './dialogue.js';
 import { createHud, updateHud } from './hud.js';
-import { MISSIONS, createMissions, missionView, pulseBeacon, stageMission, updateMissions, exportMission, restoreMission } from './missions.js';
+import { MISSIONS, createMissions, missionView, pulseBeacon, updateMissions, exportMission, restoreMission } from './missions.js';
+import { applyShot } from './shots.js';
 import { WEAPONS } from './weapons.js';
 import { createRadio, cycleRadio, nowPlaying } from './radio.js';
 import { createNeon, updateNeon } from './daynight.js';
@@ -105,52 +106,11 @@ const homePost = new THREE.Mesh(
 homePost.position.set(SAFEHOUSE.x, 1.7, SAFEHOUSE.z);
 scene.add(homePost);
 
-if (shot) {
-  player.mesh.position.set(shot.x, 0, shot.z);
-  player.mesh.rotation.y = shot.face;
-  rig.yaw = shot.yaw;
-  rig.pitch = shot.pitch;
-  rig.dist = shot.dist;
-  rig.lookY = shot.lookY;
-  rig.frozen = !testing;
-} else {
-  player.mesh.position.set(city.spawn.x, 0, city.spawn.z);
-}
-
-if (shotName === 'chase' && shot) {
-  setWantedStars(wanted, 4, shot.x, shot.z);
-  const ride = createVehicle(0, shot.x, shot.z, shot.face);
-  scene.add(ride.mesh);
-  seatPlayer(ride, player);
-  driven = ride;
-  cars.push(ride);
-  ride.speed = 27;
-  ride.condition = 0.72;
-  syncVehicle(ride, 0, 0.2);
-  stagePolice(police, 'chase', shot.x, shot.z, shot.face);
-  combat.vitals.health = 84;
-  combat.vitals.armour = 46;
-  combat.vitals.cash = 2460;
-  combat.loadout.index = 1;
-  stageMission(missions, 'chase');
-  sayLine(dialogue, 'nia', "They're on the causeway. Don't stop for the lights.", 999);
-  toast.text = 'ROADBLOCK ON THE CAUSEWAY';
-  toast.t = 999;
-} else if (shotName === 'onfoot' && shot) {
-  setWantedStars(wanted, 3, shot.x, shot.z);
-  combat.loadout.index = 1;
-  combat.gun.visible = true;
-  player.armR.rotation.x = 1.2;
-  combat.vitals.health = 62;
-  combat.vitals.armour = 18;
-  combat.vitals.cash = 6240;
-  stagePolice(police, 'onfoot', shot.x, shot.z, shot.face);
-  stageMission(missions, 'onfoot');
-  sayLine(dialogue, 'jun', 'Back room of Vesper. Forty seconds, then noise.', 999);
-} else if (shotName === 'city') {
-  stageMission(missions, 'city');
-  sayLine(dialogue, 'mateo', 'Cooler is under the kiosk. Ice, not questions.', 999);
-}
+if (!shot) player.mesh.position.set(city.spawn.x, 0, city.spawn.z);
+const staged = shot ? applyShot(shotName, {
+  scene, player, rig, cars, police, combat, wanted, missions, dialogue, toast, peds, radio, testing,
+}) : null;
+if (staged && staged.driven) driven = staged.driven;
 
 function avoidBody() {
   if (driven) return null;
@@ -503,8 +463,12 @@ if (testing) {
 }
 
 function frameFocus() {
-  if (shot && (shotName === 'city' || (!playing && shotName === 'start'))) {
-    focus.set(GRID_X * SPAN * 0.48, shot.lookY, GRID_Z * SPAN * 0.38);
+  if (shot && shotName === 'city') {
+    focus.set(GRID_X * SPAN * 0.5, shot.lookY, GRID_Z * SPAN * 0.34);
+    return;
+  }
+  if (shot && shotName === 'start') {
+    focus.set(GRID_X * SPAN * 0.46, shot.lookY, GRID_Z * SPAN * 0.33);
     return;
   }
   if (!playing) {
@@ -682,7 +646,7 @@ function tick(now) {
     dialogue,
     radio: track,
     notice: toast.t > 0 ? toast.text : '',
-    crosshair: live && !driven && combat.vitals.state === 'ok',
+    crosshair: shotName === 'onfoot' || (live && !driven && combat.vitals.state === 'ok'),
   });
   if (menus.mode === 'map') {
     drawWorldMap(menus.mapCanvas, {

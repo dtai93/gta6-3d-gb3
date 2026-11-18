@@ -13,7 +13,7 @@ export const CAR_TYPES = [
 ];
 
 const BOX = new THREE.BoxGeometry(1, 1, 1);
-const WHEEL_GEO = new THREE.CylinderGeometry(0.42, 0.42, 0.3, 8);
+const WHEEL_GEO = new THREE.CylinderGeometry(0.33, 0.33, 0.22, 8);
 WHEEL_GEO.rotateZ(Math.PI / 2);
 const HEAD_GEO = new THREE.SphereGeometry(0.12, 6, 5);
 const GLASS = new THREE.MeshLambertMaterial({ color: 0xb7d4e2 });
@@ -88,12 +88,12 @@ function buildCar(type) {
   group.add(box(TAIL, -W * 0.32, bodyY * 0.9, tail + 0.02, 0.3, 0.14, 0.06));
   group.add(box(TAIL, W * 0.32, bodyY * 0.9, tail + 0.02, 0.3, 0.14, 0.06));
   const wheels = [];
-  const wz = L * 0.34;
-  const wx = W * 0.5 + 0.02;
+  const wz = L * 0.32;
+  const wx = W * 0.36;
   const spots = [[-wx, -wz], [wx, -wz], [-wx, wz], [wx, wz]];
   for (let i = 0; i < spots.length; i++) {
     const pivot = new THREE.Group();
-    pivot.position.set(spots[i][0], 0.42, spots[i][1]);
+    pivot.position.set(spots[i][0], 0.33, spots[i][1]);
     const wheel = new THREE.Mesh(WHEEL_GEO, RUBBER);
     pivot.add(wheel);
     group.add(pivot);

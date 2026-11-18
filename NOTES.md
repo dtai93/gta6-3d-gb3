@@ -83,3 +83,15 @@ Driveable traffic. `vehicles.js` builds five cars (Solano Sprint, Harbor Cab, Do
 `daynight.js` plus `updateSkyHour` in `sky.js` — 17:00–19:30 stays the existing sunset (chase is 18:42). Later hours go blue and `updateNeon` lifts windows, parapet bands, and lamps. `fx.js` adds sparks, smoke, dust, and muzzle points. Landing, guns, and crashes shake the camera without changing its look direction. Speed adds a little FOV and camera distance.
 
 `?test=1` reports `drive-test ok` with no page exceptions. `screenshots/4-start.jpg` is the night title (1280×800, under 256 KiB). Cover `1-chase.jpg` was not replaced. A fresh chase render still shows sunset, four stars, cruisers, KESTREL-1, and the full HUD.
+
+## Session 6 — screenshot scenes
+
+`shots.js` — `applyShot` freezes `?shot=chase|onfoot|city|start&seed=1`. Chase is The Tide Job in a Solano Sprint (4 stars, three cruisers, KESTREL-1, Nia on the radio). On foot is Vesper Take on the Neon Strip with the crosshair, Strip SMG, two officers, and a cruiser. City is Coral Drop in the Sprint on Coral Shore under the aerial. Start stays the night title card.
+
+Wheels sit inside the body. The helicopter rotor is a cross so it reads against the sky. `shots.json` is `1-chase.jpg`, `2-onfoot.jpg`, `3-city.jpg`, `4-start.jpg`. All four JPEGs are 1280×800 and under 256 KiB. Cover shows the causeway chase, the searchlight, and the full HUD.
+
+## Next
+
+1. If the left cruiser still clips the cover edge, nudge `stagePolice` chase unit 0 a little toward the lane.
+2. Keep each source file one job. The judge only sees file names and the first declarations.
+3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.

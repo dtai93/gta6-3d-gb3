@@ -48,7 +48,8 @@ function helicopterMesh() {
   tail.position.set(0, 0.2, 2.4);
   const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.46), bodyMat);
   fin.position.set(0, 0.55, 3.3);
-  const rotor = new THREE.Mesh(new THREE.BoxGeometry(6.4, 0.06, 0.2), BLACK);
+  const rotor = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.08, 0.46), BLACK);
+  rotor.add(new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.08, 7.2), BLACK));
   rotor.position.y = 0.55;
   const tailRotor = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.95, 0.12), BLACK);
   tailRotor.position.set(0.22, 0.55, 3.3);
@@ -356,11 +357,16 @@ export function stagePolice(police, shot, x, z, yaw) {
     cop.yaw = yaw + Math.PI;
     cop.mesh.position.set(cop.x, 0, cop.z);
     cop.mesh.rotation.set(0, cop.yaw, 0);
-    police.hx = x + 1.2;
-    police.hz = z - 28;
-    police.hy = 9.5;
+    yawForward(yaw, _fwd);
+    const rx = -_fwd.z;
+    const rz = _fwd.x;
+    police.hx = x + _fwd.x * 16;
+    police.hz = z + _fwd.z * 16;
+    police.hy = 5.6;
     police.heli.mesh.visible = true;
+    police.heli.mesh.scale.setScalar(1.15);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
+    police.heli.mesh.rotation.y = yaw + 1.25;
     police.heli.rotor.rotation.y = 0.7;
     police.heli.beam.visible = true;
     police.heli.spot.intensity = 8;
@@ -368,22 +374,35 @@ export function stagePolice(police, shot, x, z, yaw) {
     police.bust = 0.4;
   } else if (shot === 'onfoot') {
     yawForward(yaw, _fwd);
-    placeUnit(police.units[0], x - _fwd.x * 10, z - _fwd.z * 10, yaw, 'chase', time);
-    for (let i = 1; i < police.units.length; i++) police.units[i].mesh.visible = false;
+    const rx = -_fwd.z;
+    const rz = _fwd.x;
+    placeUnit(police.units[0], x + _fwd.x * 9.5 + rx * 3.4, z + _fwd.z * 9.5 + rz * 3.4, yaw + 3.02, 'chase', time);
+    placeUnit(police.units[1], x - _fwd.x * 4.5 + rx * 5.2, z - _fwd.z * 4.5 + rz * 5.2, yaw + 0.55, 'ram', time);
+    for (let i = 2; i < police.units.length; i++) police.units[i].mesh.visible = false;
     const cop = police.officers[0];
     cop.active = true;
     cop.mesh.visible = true;
-    cop.x = x + _fwd.x * 7;
-    cop.z = z + _fwd.z * 7;
+    cop.x = x + _fwd.x * 6.4 - rx * 1.15;
+    cop.z = z + _fwd.z * 6.4 - rz * 1.15;
     cop.yaw = yaw + Math.PI;
     cop.mesh.position.set(cop.x, 0, cop.z);
     cop.mesh.rotation.set(0, cop.yaw, 0);
+    const cop2 = police.officers[1];
+    cop2.active = true;
+    cop2.mesh.visible = true;
+    cop2.x = x + _fwd.x * 12 + rx * 2.2;
+    cop2.z = z + _fwd.z * 12 + rz * 2.2;
+    cop2.yaw = yaw + Math.PI * 0.9;
+    cop2.mesh.position.set(cop2.x, 0, cop2.z);
+    cop2.mesh.rotation.set(0, cop2.yaw, 0);
     police.heli.mesh.visible = true;
-    police.heli.mesh.position.set(x + 4, 16, z - 6);
+    police.heli.mesh.scale.setScalar(1.35);
+    police.heli.mesh.position.set(x + rx * 8 + _fwd.x * 18, 10, z + rz * 8 + _fwd.z * 18);
+    police.heli.mesh.rotation.y = yaw + 0.85;
     police.heli.rotor.rotation.y = 0.4;
     police.heli.beam.visible = true;
-    police.heli.spot.intensity = 6;
-    police.heli.target.position.set(x, 1, z);
+    police.heli.spot.intensity = 7;
+    police.heli.target.position.set(cop.x, 1, cop.z);
   }
 }
 

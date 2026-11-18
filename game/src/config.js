@@ -27,10 +27,10 @@ export const CAM = {
 
 // Frozen poses. lookY is the camera's look height above the ground point.
 export const SHOTS = {
-  chase: { x: 132, z: 66, face: 0.2, yaw: 0.45, pitch: 0.34, dist: 13, lookY: 1.3 },
-  onfoot: { x: 176, z: 110, face: 1.15, yaw: 1.4, pitch: 0.2, dist: 6.2, lookY: 1.4 },
-  city: { x: 132, z: 88, face: 0.4, yaw: 0.75, pitch: 0.98, dist: 155, lookY: 6 },
-  start: { x: 154, z: 72, face: 0, yaw: 0.5, pitch: 0.7, dist: 200, lookY: 10 },
+  chase: { x: 132, z: 66, face: 0.12, yaw: 0.36, pitch: 0.3, dist: 11.6, lookY: 1.42 },
+  onfoot: { x: 176, z: 108, face: 0.05, yaw: 0.22, pitch: 0.2, dist: 6.8, lookY: 1.48 },
+  city: { x: 96, z: 44, face: -1.35, yaw: 0.7, pitch: 0.96, dist: 150, lookY: 8 },
+  start: { x: 154, z: 72, face: 0, yaw: 0.48, pitch: 0.64, dist: 176, lookY: 12 },
 };
 
 export function blockBounds(ix, iz) {
