@@ -12,11 +12,13 @@ function held(keys, names) {
 
 export function createInput(dom) {
   const keys = new Set();
+  const edges = new Set();
   const mouse = { dx: 0, dy: 0, locked: false };
 
   function down(e) {
+    if (!keys.has(e.code)) edges.add(e.code);
     keys.add(e.code);
-    if (e.code === 'Space') e.preventDefault();
+    if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
   }
   function up(e) { keys.delete(e.code); }
   function move(e) {
@@ -47,11 +49,13 @@ export function createInput(dom) {
         strafe,
         run: keys.has('ShiftLeft') || keys.has('ShiftRight'),
         jump: keys.has('Space'),
+        use: edges.has('KeyF'),
         yaw: mouse.dx,
         pitch: mouse.dy,
       };
       mouse.dx = 0;
       mouse.dy = 0;
+      edges.clear();
       return frame;
     },
   };

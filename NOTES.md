@@ -38,13 +38,12 @@ Query: `?shot=<chase|onfoot|city|start>&seed=1`. Shot freezes simulation. Captur
 
 ## This session
 
-Replaced the dodge starter with the 3D core above. Vendored three.js. Rewrote `main.ts`. `MAKEFUN_OUTPUT_DIR=/tmp/g6out node main.ts` writes a valid dossier (1 image). Street check (`?shot=chase`) shows Rafa on a road, sunset, ocean, lamps, windows.
+Driveable traffic. `vehicles.js` builds five cars (Solano Sprint, Harbor Cab, Dock Hauler, Port Sentinel, Reef Runner) with headlights, taillights, a driver, and arcade handling: accel, brake, reverse, handbrake drift, skid marks, tyre smoke, condition. F enters the nearest car and pulls the driver out; F exits to the right side. Heading is the same yaw as the on-foot body (`yawForward`, nose local −Z). `traffic.js` runs AI on the right-hand lane, braking for cars and for Rafa, stopping for cross traffic, turning at crossings, honking by flashing the headlights. `peds.js` walks block edges, turns to watch Rafa, flees, and gets knocked down by a fast car. Car-building, car-car, and car-ped contacts push apart and scrape condition. Chase camera eases behind the driven car. `?test=1` reports `ok` (accel toward −Z, wall shove, car separation, ped flee, traffic travel). `?shot=chase&seed=1` shows the Neon Strip with a cruiser, sprint, cab, muscle car, and sidewalk peds. No console errors.
 
 ## Next
 
-1. Vehicles: driveable car, traffic that moves, enter/exit. Chase camera rig when driving.
-2. Full HUD shell (mission, wanted, cash, clock, minimap, health, weapons, speedo, radio, dialogue) so later shots can fill real data.
-3. Police response and the chase shot cast (3 cars + helicopter).
-4. On-foot combat, then mission flow, save, title screen.
-5. Retake all 4 shots. Cover must be `1-chase.jpg`. Street lamps and cars are still blocky; tighten the car mesh before the cover.
-6. Keep each source file one job. The judge only sees file names and the first declarations.
+1. Full HUD shell (mission, wanted, cash, clock, minimap, health, weapons, speedo, radio, dialogue) so later shots can fill real data.
+2. Police response and the chase shot cast (3 cars + helicopter).
+3. On-foot combat, then mission flow, save, title screen.
+4. Retake all 4 shots. Cover must be `1-chase.jpg`. Tighten car silhouettes before that cover; wheels now sit outside the body.
+5. Keep each source file one job. The judge only sees file names and the first declarations.

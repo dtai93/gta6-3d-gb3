@@ -333,6 +333,7 @@ function addCars(root, rng) {
   const tops = [];
   for (let ix = 0; ix <= GRID_X; ix++) {
     for (let iz = 0; iz < GRID_Z; iz++) {
+      if (ix === 3 && iz === 1) continue;
       if (rng() < 0.42) continue;
       const side = rng() < 0.5 ? -1 : 1;
       const x = ix * SPAN + side * 3.7;
