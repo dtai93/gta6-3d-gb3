@@ -111,3 +111,19 @@ Recaptured `1-chase`, `2-onfoot`, `3-city`, `4-start`. All 1280×800 and under 2
 1. Cover camera: sit it behind the Sprint and a little above, so the foreground cruiser stops blocking the nose. Keep the other cruisers behind and beside, and KESTREL-1 higher in the purple sky.
 2. Keep each source file one job. The judge only sees file names and the first declarations.
 3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.
+
+## Session 8 — chase cover frame and HUD chips
+
+`shots.js` `stageChase` / `driftFx` — `?shot=chase` looks straight down the Neon Strip avenue. The Solano Sprint sits lower-centre, yawed into a drift, with skid marks, tyre smoke behind the rear wheels, and speed streaks. `config.js` chase pose uses a long aim so the sunset fills the top third.
+
+`police.js` `stagePolice` chase — GULL-1 and GULL-4 flank the Sprint with flashing bars. MARLIN-11 runs ahead in the left lane. KESTREL-1 hangs in the pink sky with the searchlight tilted back down the avenue. No foot officer in the lens.
+
+`hud.js` / `index.html` — IN SIGHT chip on the stars, green `+$1,200` beside the cash, day-clock chip, thicker condition bar. Minimap range is 42 so the avenue, the cross street, and the police blips separate around the arrow. District name stays under the map.
+
+Recaptured `screenshots/1-chase.jpg` (1280×800, 156 KiB) and checked a 768×480 downscale. Other shots were not replaced.
+
+## Next
+
+1. If MARLIN-11 still sits on the vanishing point, nudge its chase slot further left. Speed streaks are thin at 768; thicken them only if the car stays clear.
+2. Keep each source file one job. The judge only sees file names and the first declarations.
+3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.

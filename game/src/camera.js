@@ -24,6 +24,7 @@ export function createChaseCamera() {
     pitch: CAM.pitch,
     dist: CAM.dist,
     lookY: CAM.lookY,
+    aim: 2.2,
     frozen: false,
     shake: 0,
     shakeT: 0,

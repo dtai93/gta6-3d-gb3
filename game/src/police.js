@@ -345,35 +345,39 @@ function placeUnit(car, x, z, yaw, role, time) {
 export function stagePolice(police, shot, x, z, yaw) {
   const time = 0.18;
   if (shot === 'chase') {
-    // Offsets sit in the chase camera (yaw 0.45, pitch 0.34, dist 13): one cruiser
-    // on the near right, one on the left, a roadblock down the road, heli low ahead.
-    placeUnit(police.units[0], x + 7.2, z + 4.8, yaw + 2.55, 'ram', time);
-    placeUnit(police.units[1], x - 6.4, z + 1.2, yaw + 0.25, 'chase', time);
-    placeUnit(police.units[2], x - 1.2, z - 13.5, yaw + Math.PI * 0.9, 'roadblock', time);
-    for (let i = 3; i < police.units.length; i++) police.units[i].mesh.visible = false;
-    yawForward(yaw, _fwd);
-    const cop = police.officers[0];
-    cop.active = true;
-    cop.mesh.visible = true;
-    cop.x = x + _fwd.x * 12 + 1.8;
-    cop.z = z + _fwd.z * 12;
-    cop.yaw = yaw + Math.PI;
-    cop.mesh.position.set(cop.x, 0, cop.z);
-    cop.mesh.rotation.set(0, cop.yaw, 0);
+    // yaw is the avenue, not the hero's drift. Cops sit beside and just behind.
     yawForward(yaw, _fwd);
     const rx = -_fwd.z;
     const rz = _fwd.x;
-    police.hx = x + _fwd.x * 16;
-    police.hz = z + _fwd.z * 16;
-    police.hy = 5.6;
+    const cops = [
+      { s: -4.3, b: 0.35, turn: 0.12, role: 'chase', t: 0.02 },
+      { s: 4.4, b: 0.7, turn: -0.1, role: 'ram', t: 0.16 },
+      { s: -5.1, b: -7.4, turn: 0.08, role: 'chase', t: 0.28 },
+    ];
+    for (let i = 0; i < cops.length; i++) {
+      const c = cops[i];
+      const px = x - _fwd.x * c.b + rx * c.s;
+      const pz = z - _fwd.z * c.b + rz * c.s;
+      placeUnit(police.units[i], px, pz, yaw + c.turn, c.role, c.t);
+    }
+    for (let i = 3; i < police.units.length; i++) police.units[i].mesh.visible = false;
+    for (let i = 0; i < police.officers.length; i++) {
+      police.officers[i].active = false;
+      police.officers[i].mesh.visible = false;
+    }
+    police.hx = x + _fwd.x * 17 + rx * 3.2;
+    police.hz = z + _fwd.z * 17 + rz * 3.2;
+    police.hy = 8.05;
     police.heli.mesh.visible = true;
-    police.heli.mesh.scale.setScalar(1.15);
+    police.heli.mesh.scale.setScalar(1.7);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
-    police.heli.mesh.rotation.y = yaw + 1.25;
+    police.heli.mesh.rotation.y = yaw + 0.85;
     police.heli.rotor.rotation.y = 0.7;
     police.heli.beam.visible = true;
-    police.heli.spot.intensity = 8;
-    police.heli.target.position.set(x, 0.6, z);
+    police.heli.beam.rotation.x = -0.38;
+    police.heli.beam.material.opacity = 0.34;
+    police.heli.spot.intensity = 10;
+    police.heli.target.position.set(x, 0.5, z);
     police.bust = 0.4;
   } else if (shot === 'onfoot') {
     yawForward(yaw, _fwd);

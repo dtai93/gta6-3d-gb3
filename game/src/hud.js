@@ -2,7 +2,7 @@
 import { GRID_X, GRID_Z, SPAN } from './config.js';
 import { paintPortrait } from './dialogue.js';
 
-const RANGE = 150;
+const RANGE = 42;
 
 function money(n) {
   const v = Math.max(0, Math.floor(n));
@@ -41,7 +41,9 @@ export function createHud(root) {
     missionFill: el(root, 'mission-fill'),
     missionNext: el(root, 'mission-next'),
     stars: el(root, 'stars'),
+    insight: el(root, 'insight'),
     cash: el(root, 'cash'),
+    cashPop: el(root, 'cashpop'),
     clock: el(root, 'clock'),
     units: el(root, 'units'),
     notice: el(root, 'notice'),
@@ -79,8 +81,9 @@ function drawMap(canvas, s) {
   const shore = P(px, 0);
   ctx.fillStyle = '#1c7f96';
   ctx.fillRect(0, shore[1], w, h);
-  ctx.strokeStyle = '#efe6d4';
-  ctx.lineWidth = 6;
+  ctx.strokeStyle = '#c8bfae';
+  ctx.lineWidth = 14;
+  ctx.lineCap = 'square';
   const maxX = GRID_X * SPAN;
   const maxZ = GRID_Z * SPAN;
   for (let i = 0; i <= GRID_X; i++) {
@@ -113,18 +116,31 @@ function drawMap(canvas, s) {
   const cops = s.police || [];
   for (let i = 0; i < cops.length; i++) {
     const p = P(cops[i].x, cops[i].z);
-    ctx.fillStyle = cops[i].kind === 'air' ? '#8fd4ff' : '#ff3a3a';
-    ctx.fillRect(p[0] - 6, p[1] - 6, 12, 12);
+    ctx.beginPath();
+    ctx.fillStyle = cops[i].kind === 'air' ? '#8fd4ff' : '#ff3b3b';
+    ctx.strokeStyle = '#1a1208';
+    ctx.lineWidth = 3;
+    if (cops[i].kind === 'air') {
+      ctx.moveTo(p[0], p[1] - 12);
+      ctx.lineTo(p[0] + 11, p[1]);
+      ctx.lineTo(p[0], p[1] + 12);
+      ctx.lineTo(p[0] - 11, p[1]);
+    } else {
+      ctx.arc(p[0], p[1], 9, 0, Math.PI * 2);
+    }
+    ctx.closePath();
+    ctx.fill();
+    ctx.stroke();
   }
   ctx.save();
   ctx.translate(w / 2, h / 2);
   ctx.rotate(Math.PI + (s.yaw || 0));
   ctx.fillStyle = '#fff8ee';
   ctx.beginPath();
-  ctx.moveTo(0, -14);
-  ctx.lineTo(9, 11);
-  ctx.lineTo(0, 5);
-  ctx.lineTo(-9, 11);
+  ctx.moveTo(0, -11);
+  ctx.lineTo(7, 9);
+  ctx.lineTo(0, 4);
+  ctx.lineTo(-7, 9);
   ctx.closePath();
   ctx.fill();
   ctx.restore();
@@ -144,7 +160,12 @@ export function updateHud(hud, s) {
     for (let i = 0; i < 5; i++) stars += i < s.stars ? '★' : '☆';
   }
   hud.stars.textContent = stars;
+  hud.insight.hidden = !(s.inSight && s.stars > 0 && s.down !== 'wasted' && s.down !== 'busted');
   hud.cash.textContent = money(s.cash);
+  if (s.cashPop > 0) {
+    hud.cashPop.hidden = false;
+    hud.cashPop.textContent = '+$' + String(Math.round(s.cashPop)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  } else hud.cashPop.hidden = true;
   hud.clock.textContent = clockText(s.day, s.clock);
   const rows = s.police || [];
   if (!rows.length) hud.units.textContent = 'NO UNITS IN RANGE';

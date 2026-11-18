@@ -476,8 +476,9 @@ function frameFocus() {
     return;
   }
   if (driven) {
-    yawForward(driven.yaw, nose);
-    focus.set(driven.x + nose.x * 2.2, rig.lookY, driven.z + nose.z * 2.2);
+    const aim = rig.aim > 0 ? rig.aim : 2.2;
+    yawForward(shotName === 'chase' ? rig.yaw : driven.yaw, nose);
+    focus.set(driven.x + nose.x * aim, rig.lookY, driven.z + nose.z * aim);
     return;
   }
   focus.set(player.mesh.position.x, rig.lookY + player.mesh.position.y, player.mesh.position.z);
@@ -617,7 +618,8 @@ function tick(now) {
     rig.dist = 190;
     rig.lookY = 12;
   }
-  if (live && driven) camera.fov = baseFov + Math.min(6, Math.abs(driven.speed) * 0.11);
+  if (shot && shotName === 'chase') camera.fov = 64;
+  else if (live && driven) camera.fov = baseFov + Math.min(6, Math.abs(driven.speed) * 0.11);
   else camera.fov = baseFov;
   camera.updateProjectionMatrix();
   placeCamera();
@@ -635,6 +637,8 @@ function tick(now) {
     health: combat.vitals.health,
     armour: combat.vitals.armour,
     cash: combat.vitals.cash,
+    cashPop: combat.vitals.cashPop || 0,
+    inSight: !!(wanted.seen && wanted.stars > 0),
     day,
     clock: dayClock,
     police: policeRoster(police, here.x, here.z),
