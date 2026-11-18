@@ -61,6 +61,7 @@ export function createHud(root) {
     veh: el(root, 'veh-name'),
     cond: el(root, 'cond').querySelector('b'),
     cross: el(root, 'crosshair'),
+    wheel: el(root, 'wheel'),
     complete: el(root, 'complete'),
     doneTitle: el(root, 'done-title'),
     doneCash: el(root, 'done-cash'),
@@ -218,6 +219,11 @@ export function updateHud(hud, s) {
   }
   drawMap(hud.map, s);
   hud.cross.style.display = s.crosshair ? 'block' : 'none';
+  if (hud.wheel) {
+    hud.wheel.hidden = !s.wheel;
+    const segs = hud.wheel.querySelectorAll('.wseg');
+    for (let i = 0; i < segs.length; i++) segs[i].className = 'wseg s' + i + (i === loadout.index ? ' on' : '');
+  }
   if (s.banner) {
     hud.complete.hidden = false;
     hud.doneTitle.textContent = s.banner;

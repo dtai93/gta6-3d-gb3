@@ -6,7 +6,8 @@ import { setWantedStars } from './wanted.js';
 import { stagePolice } from './police.js';
 import { stageMission } from './missions.js';
 import { say as sayLine } from './dialogue.js';
-import { createVehicle, seatPlayer, syncVehicle } from './vehicles.js';
+import { addGlow } from './glow.js';
+import { createVehicle, seatPlayer, syncVehicle, yawFromDir } from './vehicles.js';
 
 function poseRig(player, rig, shot, testing) {
   player.mesh.position.set(shot.x, 0, shot.z);
@@ -131,32 +132,139 @@ function stageChase(world, shot) {
   return ride;
 }
 
+function bolt(scene, ax, ay, az, bx, by, bz, color) {
+  const len = Math.hypot(bx - ax, by - ay, bz - az) || 1;
+  const mesh = new THREE.Mesh(
+    new THREE.BoxGeometry(0.07, 0.07, 1),
+    new THREE.MeshBasicMaterial({ color, transparent: true, opacity: 0.94, depthWrite: false }),
+  );
+  mesh.position.set((ax + bx) * 0.5, (ay + by) * 0.5, (az + bz) * 0.5);
+  mesh.scale.z = len;
+  mesh.lookAt(bx, by, bz);
+  scene.add(mesh);
+}
+
+function muzzle(scene, x, y, z, color) {
+  addGlow(scene, x, y, z, 0xfff6e4, 0.55);
+  addGlow(scene, x, y, z, color, 1.7);
+}
+
+function fightFx(scene, x, z, yaw, cops) {
+  const fx = -Math.sin(yaw);
+  const fz = -Math.cos(yaw);
+  const rx = Math.cos(yaw);
+  const rz = -Math.sin(yaw);
+  const mx = x + fx * 0.9 + rx * 0.34;
+  const my = 1.34;
+  const mz = z + fz * 0.9 + rz * 0.34;
+  muzzle(scene, mx, my, mz, 0xffb15a);
+  for (let i = 0; i < cops.length; i++) {
+    const c = cops[i];
+    bolt(scene, mx, my, mz, c.x, 1.16, c.z, i ? 0xffe08a : 0xfff4c8);
+    muzzle(scene, c.x - fx * 0.5, 1.22, c.z - fz * 0.5, 0xff5a3a);
+    bolt(scene, c.x, 1.22, c.z, x - rx * (1.2 + i * 0.7), 1.05, z - rz * (1.2 + i * 0.7), 0xff4d3a);
+  }
+  const warm = new THREE.PointLight(0xffb27a, 24, 18, 1.4);
+  warm.position.set(x + fx * 2.2, 2.6, z + fz * 2.2);
+  scene.add(warm);
+  const cool = new THREE.PointLight(0x79b6ff, 18, 16, 1.5);
+  cool.position.set(cops[0].x, 2.5, cops[0].z);
+  scene.add(cool);
+  const pink = new THREE.PointLight(0xff4ad4, 12, 22, 2);
+  pink.position.set(x - rx * 6, 5.2, z + fz * 3);
+  scene.add(pink);
+}
+
+function districtTag(scene, text, x, y, z) {
+  const canvas = document.createElement('canvas');
+  canvas.width = 512;
+  canvas.height = 96;
+  const g = canvas.getContext('2d');
+  g.fillStyle = 'rgba(10,12,18,0.8)';
+  g.fillRect(6, 12, 500, 72);
+  g.strokeStyle = '#ffc14a';
+  g.lineWidth = 6;
+  g.strokeRect(6, 12, 500, 72);
+  g.fillStyle = '#fff6ea';
+  g.font = '700 42px sans-serif';
+  g.textAlign = 'center';
+  g.textBaseline = 'middle';
+  g.fillText(text, 256, 48);
+  const sprite = new THREE.Sprite(new THREE.SpriteMaterial({
+    map: new THREE.CanvasTexture(canvas),
+    transparent: true,
+    depthTest: false,
+    depthWrite: false,
+    fog: false,
+  }));
+  sprite.position.set(x, y, z);
+  sprite.scale.set(36, 6.8, 1);
+  sprite.renderOrder = 12;
+  scene.add(sprite);
+}
+
+function park(world, typeId, x, z, yaw) {
+  for (let i = 0; i < world.cars.length; i++) {
+    if (Math.hypot(world.cars[i].x - x, world.cars[i].z - z) < 7) return;
+  }
+  const ride = createVehicle(typeId, x, z, yaw);
+  world.scene.add(ride.mesh);
+  world.cars.push(ride);
+  ride.speed = 8;
+  ride.condition = 0.9;
+  syncVehicle(ride, 0, 0.3);
+}
+
 function stageOnFoot(world, shot) {
-  const { player, combat, wanted, missions, dialogue, radio, peds } = world;
-  setWantedStars(wanted, 3, shot.x, shot.z);
+  const { player, combat, wanted, missions, dialogue, radio, peds, toast } = world;
+  setWantedStars(wanted, 4, shot.x, shot.z);
+  wanted.seen = true;
   stand(player, combat, 2);
-  combat.vitals.health = 62;
-  combat.vitals.armour = 18;
+  combat.vitals.health = 64;
+  combat.vitals.armour = 36;
   combat.vitals.cash = 6240;
+  combat.vitals.cashPop = 800;
   stagePolice(world.police, 'onfoot', shot.x, shot.z, shot.face);
+  for (let i = 0; i < world.cars.length; i++) {
+    const car = world.cars[i];
+    if (!car.cop && Math.hypot(car.x - shot.x, car.z - shot.z) < 14) car.mesh.visible = false;
+  }
+  fightFx(world.scene, shot.x, shot.z, shot.face, [world.police.officers[0], world.police.officers[1]]);
   stageMission(missions, 'onfoot');
-  sayLine(dialogue, 'jun', 'Back room of Vesper. Forty seconds, then noise.', 999);
+  sayLine(dialogue, 'jun', 'On the pavement. Drop them before they reach the till.', 999);
+  toast.text = 'SHOTS FIRED ON THE STRIP';
+  toast.t = 999;
   radio.index = 2;
-  mountCar(world, 4, shot.x - 3.4, shot.z - 13.5, shot.face + 0.15, 0, 0.9);
-  placePed(peds.list[0], shot.x - 2.6, shot.z - 1.6, shot.face + 2.4);
-  placePed(peds.list[1], shot.x + 3.2, shot.z - 5.5, shot.face);
+  placePed(peds.list[0], shot.x - 5.4, shot.z + 1.6, shot.face + 1.7);
+  placePed(peds.list[1], shot.x + 5.6, shot.z - 0.8, shot.face - 0.5);
   return null;
 }
 
 function stageCity(world, shot) {
-  const { combat, missions, dialogue, radio } = world;
-  const ride = drive(world, 0, shot, 16, 0.96);
+  const { combat, missions, dialogue, radio, scene } = world;
+  const ride = drive(world, 0, shot, 18, 0.94);
   combat.vitals.health = 100;
   combat.vitals.armour = 40;
   combat.vitals.cash = 480;
+  combat.vitals.cashPop = 200;
   stageMission(missions, 'city');
   sayLine(dialogue, 'mateo', 'Cooler is under the kiosk. Ice, not questions.', 999);
   radio.index = 4;
+  const east = yawFromDir(1, 0);
+  const west = yawFromDir(-1, 0);
+  const north = yawFromDir(0, 1);
+  const south = yawFromDir(0, -1);
+  const spots = [
+    [1, 40, 45.9, east], [3, 110, 42.1, west], [2, 168, 45.9, east], [4, 210, 42.1, west],
+    [0, 86.1, 18, north], [1, 89.9, 100, south], [3, 130.1, 150, north], [2, 177.9, 90, east],
+    [4, 221.9, 132, north], [1, 48, 89.9, east], [0, 42.1, 160, south], [3, 174.1, 176, north],
+  ];
+  for (let i = 0; i < spots.length; i++) park(world, spots[i][0], spots[i][1], spots[i][2], spots[i][3]);
+  districtTag(scene, 'CORAL SHORE', 62, 36, 18);
+  districtTag(scene, 'OLD HARBOR', 186, 32, 14);
+  districtTag(scene, 'NEON STRIP', 132, 68, 112);
+  districtTag(scene, 'PALM HEIGHTS', 52, 30, 188);
+  districtTag(scene, 'INDUSTRIAL DOCKS', 238, 28, 130);
   return ride;
 }
 

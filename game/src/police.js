@@ -383,33 +383,38 @@ export function stagePolice(police, shot, x, z, yaw) {
     yawForward(yaw, _fwd);
     const rx = -_fwd.z;
     const rz = _fwd.x;
-    placeUnit(police.units[0], x + _fwd.x * 9.5 + rx * 3.4, z + _fwd.z * 9.5 + rz * 3.4, yaw + 3.02, 'chase', time);
-    placeUnit(police.units[1], x - _fwd.x * 4.5 + rx * 5.2, z - _fwd.z * 4.5 + rz * 5.2, yaw + 0.55, 'ram', time);
+    placeUnit(police.units[0], x + _fwd.x * 10.5 + rx * 4.4, z + _fwd.z * 10.5 + rz * 4.4, yaw + 2.7, 'chase', 0.04);
+    placeUnit(police.units[1], x + _fwd.x * 16.5 - rx * 2.4, z + _fwd.z * 16.5 - rz * 2.4, yaw + Math.PI, 'ram', 0.22);
     for (let i = 2; i < police.units.length; i++) police.units[i].mesh.visible = false;
-    const cop = police.officers[0];
-    cop.active = true;
-    cop.mesh.visible = true;
-    cop.x = x + _fwd.x * 6.4 - rx * 1.15;
-    cop.z = z + _fwd.z * 6.4 - rz * 1.15;
-    cop.yaw = yaw + Math.PI;
-    cop.mesh.position.set(cop.x, 0, cop.z);
-    cop.mesh.rotation.set(0, cop.yaw, 0);
-    const cop2 = police.officers[1];
-    cop2.active = true;
-    cop2.mesh.visible = true;
-    cop2.x = x + _fwd.x * 12 + rx * 2.2;
-    cop2.z = z + _fwd.z * 12 + rz * 2.2;
-    cop2.yaw = yaw + Math.PI * 0.9;
-    cop2.mesh.position.set(cop2.x, 0, cop2.z);
-    cop2.mesh.rotation.set(0, cop2.yaw, 0);
+    const spots = [{ i: 0, f: 6.6, s: -1.8 }, { i: 1, f: 8.8, s: 2.6 }];
+    for (let n = 0; n < spots.length; n++) {
+      const s = spots[n];
+      const cop = police.officers[s.i];
+      cop.active = true;
+      cop.mesh.visible = true;
+      cop.x = x + _fwd.x * s.f + rx * s.s;
+      cop.z = z + _fwd.z * s.f + rz * s.s;
+      cop.yaw = yaw + Math.PI;
+      cop.mesh.position.set(cop.x, 0, cop.z);
+      cop.mesh.rotation.set(0, cop.yaw, 0);
+    }
+    for (let i = 2; i < police.officers.length; i++) {
+      police.officers[i].active = false;
+      police.officers[i].mesh.visible = false;
+    }
+    police.hx = x + rx * 5.5 + _fwd.x * 13;
+    police.hz = z + rz * 5.5 + _fwd.z * 13;
+    police.hy = 14.5;
     police.heli.mesh.visible = true;
-    police.heli.mesh.scale.setScalar(1.35);
-    police.heli.mesh.position.set(x + rx * 8 + _fwd.x * 18, 10, z + rz * 8 + _fwd.z * 18);
-    police.heli.mesh.rotation.y = yaw + 0.85;
-    police.heli.rotor.rotation.y = 0.4;
+    police.heli.mesh.scale.setScalar(1.6);
+    police.heli.mesh.position.set(police.hx, police.hy, police.hz);
+    police.heli.mesh.rotation.y = yaw + 0.5;
+    police.heli.rotor.rotation.y = 0.85;
     police.heli.beam.visible = true;
-    police.heli.spot.intensity = 7;
-    police.heli.target.position.set(cop.x, 1, cop.z);
+    police.heli.beam.rotation.x = 0.62;
+    police.heli.beam.material.opacity = 0.46;
+    police.heli.spot.intensity = 16;
+    police.heli.target.position.set(x, 1.1, z);
   }
 }
 

@@ -41,6 +41,7 @@ export function captureState(s) {
     },
     weapons: s.weapons || [],
     weapon: s.weapon | 0,
+    played: s.played || 0,
   };
 }
 

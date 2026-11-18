@@ -84,6 +84,8 @@ let lastCond = 1;
 let dustT = 0;
 let titleYaw = 0.55;
 if (shotName === 'start') dayClock = 21 * 3600 + 18 * 60;
+if (shotName === 'onfoot') dayClock = 22 * 3600 + 14 * 60;
+let played = shotName === 'start' ? 2 * 3600 + 14 * 60 : 0;
 
 const neon = createNeon(city.glow);
 const fx = createFx(scene);
@@ -156,6 +158,7 @@ function applySave(data) {
   setWantedStars(wanted, data.stars || 0, data.x, data.z);
   day = data.day || 2;
   dayClock = data.clock == null ? dayClock : data.clock;
+  played = data.played || 0;
   radio.index = data.radio || 0;
   restoreMission(missions, data.mission);
   const slots = combat.loadout.slots;
@@ -207,6 +210,7 @@ function commitSave(place) {
     mission: exportMission(missions),
     weapons: combat.loadout.slots.map((s) => ({ rounds: s.rounds, reserve: s.reserve })),
     weapon: combat.loadout.index,
+    played,
   });
   if (place === 'SAFEHOUSE') {
     data.x = SAFEHOUSE.x;
@@ -228,6 +232,7 @@ function shotPreview() {
     day: 2, clock: 21 * 3600 + 18 * 60, radio: 2,
     place: 'SAFEHOUSE', district: 'Coral Shore',
     missionTitle: 'MISSION 3/6 · THE TIDE JOB',
+    played: 2 * 3600 + 14 * 60,
     mission: { active: 2, stage: 1, progress: 0.64, cleared: 2 },
     weapons: [], weapon: 1,
   };
@@ -463,12 +468,17 @@ if (testing) {
 }
 
 function frameFocus() {
+  if (shot && shotName === 'onfoot') {
+    yawForward(player.mesh.rotation.y, nose);
+    focus.set(player.mesh.position.x + nose.x * 5.4, 1.22, player.mesh.position.z + nose.z * 5.4);
+    return;
+  }
   if (shot && shotName === 'city') {
-    focus.set(GRID_X * SPAN * 0.5, shot.lookY, GRID_Z * SPAN * 0.34);
+    focus.set(124, 5, 72);
     return;
   }
   if (shot && shotName === 'start') {
-    focus.set(GRID_X * SPAN * 0.46, shot.lookY, GRID_Z * SPAN * 0.33);
+    focus.set(156, 7, 48);
     return;
   }
   if (!playing) {
@@ -489,7 +499,17 @@ function placeCamera() {
   updateSkyHour(sky, hour);
   updateNeon(neon, hour);
   const sunset = hour >= 17 && hour < 19.5;
-  renderer.toneMappingExposure = (hour >= 20 || hour < 5) ? 0.9 : sunset ? 1.2 : 1.08;
+  let exposure = (hour >= 20 || hour < 5) ? 0.98 : sunset ? 1.2 : 1.08;
+  if (shotName === 'onfoot') {
+    exposure = 1.22;
+    sky.hemi.intensity = 0.95;
+  }
+  if (shotName === 'city') {
+    scene.fog.near = 280;
+    scene.fog.far = 1600;
+  }
+  if (shotName === 'start') exposure = 1.08;
+  renderer.toneMappingExposure = exposure;
   frameFocus();
   updateChaseCamera(camera, rig, focus);
   sky.follow(focus, (shotName === 'city' || !playing) ? 100 : Math.max(28, rig.dist * 1.4));
@@ -552,6 +572,7 @@ function tick(now) {
     step(dt, sample);
     clock += dt;
     dayClock += dt * 40;
+    played += dt;
     if (dayClock >= 86400) { dayClock -= 86400; day += 1; }
     if (!shot && !driven && insideSafehouse(player.mesh.position.x, player.mesh.position.z)) {
       if (!homeLatch) { homeLatch = true; commitSave('SAFEHOUSE'); }
@@ -619,6 +640,8 @@ function tick(now) {
     rig.lookY = 12;
   }
   if (shot && shotName === 'chase') camera.fov = 64;
+  else if (shot && shotName === 'city') camera.fov = 55;
+  else if (shot && shotName === 'onfoot') camera.fov = 60;
   else if (live && driven) camera.fov = baseFov + Math.min(6, Math.abs(driven.speed) * 0.11);
   else camera.fov = baseFov;
   camera.updateProjectionMatrix();
@@ -652,6 +675,7 @@ function tick(now) {
     radio: track,
     notice: toast.t > 0 ? toast.text : '',
     crosshair: shotName === 'onfoot' || (live && !driven && combat.vitals.state === 'ok'),
+    wheel: shotName === 'onfoot',
   });
   if (menus.mode === 'map') {
     drawWorldMap(menus.mapCanvas, {

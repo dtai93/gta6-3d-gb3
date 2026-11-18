@@ -21,6 +21,14 @@ function stars(n) {
   return s;
 }
 
+function playedText(sec) {
+  const s = Math.max(0, Math.floor(sec || 0));
+  const h = Math.floor(s / 3600);
+  const m = Math.floor(s / 60) % 60;
+  const mm = m < 10 ? '0' + m : '' + m;
+  return h + 'h ' + mm + 'm';
+}
+
 function placeLine(save) {
   if (save.place === 'SAFEHOUSE') return 'Safehouse';
   if (save.place === 'AUTOSAVE') return 'Autosave after the job';
@@ -101,8 +109,10 @@ export function createMenus(root) {
       slot.innerHTML = '<b>SAVE SLOT</b><p>Empty</p><p>Coral Shore safehouse</p><p>New Game starts on the shore road.</p>';
       return;
     }
+    const played = save.played ? '<p>PLAYED ' + playedText(save.played) + '</p>' : '';
     slot.innerHTML = '<b>SAVE SLOT · ' + (save.place || 'SAVE') + '</b>'
       + '<p>DAY ' + save.day + ' · ' + clockText(save.clock) + '</p>'
+      + played
       + '<p>' + (save.district || 'Port Solano') + ' · ' + placeLine(save) + '</p>'
       + '<p>' + money(save.cash) + ' · ' + (save.missionTitle || '') + '</p>'
       + '<p>' + stars(save.stars) + '</p>';

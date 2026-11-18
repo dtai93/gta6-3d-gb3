@@ -29,9 +29,9 @@ export const CAM = {
 export const SHOTS = {
   // aim is how far ahead of the hero the chase camera looks. yaw is the road; face is the drift.
   chase: { x: 133.4, z: 64, face: 0.48, yaw: 0, pitch: 0.115, dist: 24.2, lookY: 1.05, aim: 13.2 },
-  onfoot: { x: 176, z: 108, face: 0.05, yaw: 0.22, pitch: 0.2, dist: 6.8, lookY: 1.48 },
-  city: { x: 96, z: 44, face: -1.35, yaw: 0.7, pitch: 0.96, dist: 150, lookY: 8 },
-  start: { x: 154, z: 72, face: 0, yaw: 0.48, pitch: 0.64, dist: 176, lookY: 12 },
+  onfoot: { x: 133.9, z: 132, face: 0.04, yaw: 0.04, pitch: 0.24, dist: 11.2, lookY: 1.2 },
+  city: { x: 70, z: 45.9, face: -1.57, yaw: 0.1, pitch: 0.47, dist: 250, lookY: 5 },
+  start: { x: 154, z: 40, face: 0, yaw: 0.62, pitch: 0.44, dist: 220, lookY: 8 },
 };
 
 export function blockBounds(ix, iz) {
