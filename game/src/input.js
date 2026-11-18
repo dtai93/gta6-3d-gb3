@@ -13,6 +13,7 @@ function held(keys, names) {
 export function createInput(dom) {
   const keys = new Set();
   const edges = new Set();
+  const buttons = new Set();
   const mouse = { dx: 0, dy: 0, locked: false };
 
   function down(e) {
@@ -21,6 +22,14 @@ export function createInput(dom) {
     if (e.code === 'Space' || e.code.startsWith('Arrow')) e.preventDefault();
   }
   function up(e) { keys.delete(e.code); }
+  function mouseDown(e) {
+    if (!buttons.has(e.button)) {
+      if (e.button === 0) edges.add('Mouse0');
+      if (e.button === 2) edges.add('Mouse2');
+    }
+    buttons.add(e.button);
+  }
+  function mouseUp(e) { buttons.delete(e.button); }
   function move(e) {
     if (document.pointerLockElement !== dom) return;
     mouse.dx += e.movementX || 0;
@@ -36,8 +45,11 @@ export function createInput(dom) {
   window.addEventListener('keydown', down);
   window.addEventListener('keyup', up);
   window.addEventListener('mousemove', move);
+  window.addEventListener('mousedown', mouseDown);
+  window.addEventListener('mouseup', mouseUp);
   document.addEventListener('pointerlockchange', lockChange);
   dom.addEventListener('click', requestLock);
+  dom.addEventListener('contextmenu', (e) => e.preventDefault());
 
   return {
     get locked() { return mouse.locked; },
@@ -50,6 +62,11 @@ export function createInput(dom) {
         run: keys.has('ShiftLeft') || keys.has('ShiftRight'),
         jump: keys.has('Space'),
         use: edges.has('KeyF'),
+        fire: buttons.has(0),
+        fireEdge: edges.has('Mouse0'),
+        aim: buttons.has(2),
+        reload: edges.has('KeyR'),
+        slot: edges.has('Digit1') ? 1 : edges.has('Digit2') ? 2 : edges.has('Digit3') ? 3 : edges.has('Digit4') ? 4 : 0,
         yaw: mouse.dx,
         pitch: mouse.dy,
       };

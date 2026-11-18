@@ -181,6 +181,7 @@ export function updatePeds(peds, dt, threat, threatSpeed, blocks, cars) {
           car.vx *= 0.82;
           car.vz *= 0.82;
           damageVehicle(car, 0.02);
+          ped.struck = car.player ? 'player' : '';
         } else {
           const away = pushCircle(ped.x, ped.z, hitR, [{ minX: car.x - 0.2, maxX: car.x + 0.2, minZ: car.z - 0.2, maxZ: car.z + 0.2 }]);
           ped.x = away.x;
