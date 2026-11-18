@@ -1,53 +1,58 @@
-// Keyboard and pointer input. Held keys give a steering direction; one-shot presses (start or
-// restart, pause) are queued as bit flags and taken once by the loop, so a press between two
-// frames is never lost and never counted twice.
+// Keyboard axes plus pointer-lock mouse. sample() returns one frame and clears mouse deltas.
 
-export const ACTION_CONFIRM = 1;
-export const ACTION_PAUSE = 2;
+const FORWARD = ['KeyW', 'ArrowUp'];
+const BACK = ['KeyS', 'ArrowDown'];
+const LEFT = ['KeyA', 'ArrowLeft'];
+const RIGHT = ['KeyD', 'ArrowRight'];
 
-const LEFT = new Set(['ArrowLeft', 'KeyA']);
-const RIGHT = new Set(['ArrowRight', 'KeyD']);
-const CONFIRM = new Set(['Space', 'Enter']);
-const PAUSE = new Set(['KeyP', 'Escape']);
+function held(keys, names) {
+  for (let i = 0; i < names.length; i++) if (keys.has(names[i])) return true;
+  return false;
+}
 
-export function createInput(target) {
-  let left = false;
-  let right = false;
-  let actions = 0;
+export function createInput(dom) {
+  const keys = new Set();
+  const mouse = { dx: 0, dy: 0, locked: false };
 
-  window.addEventListener('keydown', (event) => {
-    if (LEFT.has(event.code)) left = true;
-    else if (RIGHT.has(event.code)) right = true;
-    else if (CONFIRM.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_CONFIRM;
-    } else if (PAUSE.has(event.code)) {
-      if (!event.repeat) actions |= ACTION_PAUSE;
-    } else return;
-    event.preventDefault();
-  });
-  window.addEventListener('keyup', (event) => {
-    if (LEFT.has(event.code)) left = false;
-    else if (RIGHT.has(event.code)) right = false;
-  });
-  // A key released while the tab is hidden never sends keyup: let go of everything on blur.
-  window.addEventListener('blur', () => {
-    left = false;
-    right = false;
-  });
-  target.addEventListener('pointerdown', () => {
-    actions |= ACTION_CONFIRM;
-  });
+  function down(e) {
+    keys.add(e.code);
+    if (e.code === 'Space') e.preventDefault();
+  }
+  function up(e) { keys.delete(e.code); }
+  function move(e) {
+    if (document.pointerLockElement !== dom) return;
+    mouse.dx += e.movementX || 0;
+    mouse.dy += e.movementY || 0;
+  }
+  function lockChange() {
+    mouse.locked = document.pointerLockElement === dom;
+  }
+  function requestLock() {
+    if (document.pointerLockElement !== dom && dom.requestPointerLock) dom.requestPointerLock();
+  }
+
+  window.addEventListener('keydown', down);
+  window.addEventListener('keyup', up);
+  window.addEventListener('mousemove', move);
+  document.addEventListener('pointerlockchange', lockChange);
+  dom.addEventListener('click', requestLock);
 
   return {
-    /** -1 for left, 1 for right, 0 for neither or both. */
-    direction() {
-      return (right ? 1 : 0) - (left ? 1 : 0);
-    },
-    /** The one-shot presses since the last call, as ACTION_* flags. */
-    takeActions() {
-      const taken = actions;
-      actions = 0;
-      return taken;
+    get locked() { return mouse.locked; },
+    sample() {
+      const forward = (held(keys, FORWARD) ? 1 : 0) - (held(keys, BACK) ? 1 : 0);
+      const strafe = (held(keys, RIGHT) ? 1 : 0) - (held(keys, LEFT) ? 1 : 0);
+      const frame = {
+        forward,
+        strafe,
+        run: keys.has('ShiftLeft') || keys.has('ShiftRight'),
+        jump: keys.has('Space'),
+        yaw: mouse.dx,
+        pitch: mouse.dy,
+      };
+      mouse.dx = 0;
+      mouse.dy = 0;
+      return frame;
     },
   };
 }

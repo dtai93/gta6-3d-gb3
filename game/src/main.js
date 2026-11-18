@@ -1,134 +1,96 @@
-// Boot and the one loop: input is read every frame, the world advances in fixed 1/60 s steps
-// (several in a slow frame, none in a fast one), and the renderer paints what is there. The game
-// moves between four screens: title, play, paused and game over.
-//
-// ?seed=N fixes the falling pattern. ?shot=start|play|end (with &seed=N) stages that scene
-// instead of running the loop, paints it twice and sets window.__shotReady for a screenshot.
-import { BEST_KEY, LIVES, STEP } from './config.js';
-import { createRandom } from './random.js';
-import { createWorld, EVENT_HIT, EVENT_OVER } from './world.js';
-import { ACTION_CONFIRM, ACTION_PAUSE, createInput } from './input.js';
-import { createRenderer, SCREEN_OVER, SCREEN_PAUSED, SCREEN_PLAY, SCREEN_TITLE } from './render.js';
-import { stageShot } from './shots.js';
+// Boot, play loop, and frozen screenshot poses for Port Solano.
 
-/** The longest frame the loop catches up on; a longer stall (a hidden tab) is dropped, not replayed. */
-const MAX_FRAME = 0.25;
+import * as THREE from '../vendor/three.module.min.js';
+import { SHOTS, GRID_X, GRID_Z, SPAN } from './config.js';
+import { makeRng } from './rng.js';
+import { createInput } from './input.js';
+import { createSky } from './sky.js';
+import { createCity, districtAt } from './city.js';
+import { createChaseCamera, updateChaseCamera, applyMouseLook, planarBasis } from './camera.js';
+import { createPlayer, updatePlayer } from './player.js';
 
-const params = new URLSearchParams(window.location.search);
-const shot = params.get('shot');
-const seedParam = Number.parseInt(params.get('seed') ?? '', 10);
-const seed = Number.isInteger(seedParam) ? seedParam : Math.floor(Math.random() * 4294967296);
+const params = new URLSearchParams(location.search);
+const shotName = params.get('shot');
+const seed = Number(params.get('seed') || '1') || 1;
+const shot = SHOTS[shotName] || null;
+const aerial = shotName === 'city' || shotName === 'start';
 
-const canvas = document.getElementById('game');
-const status = document.getElementById('status');
-const world = createWorld(createRandom(seed));
-const renderer = createRenderer(canvas);
+const canvas = document.getElementById('view');
+const districtEl = document.getElementById('district');
+const statusEl = document.getElementById('status');
 
-function readBest() {
-  try {
-    return Number.parseInt(window.localStorage.getItem(BEST_KEY) ?? '0', 10) || 0;
-  } catch {
-    return 0;
-  }
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.shadowMap.enabled = true;
+renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.05;
+
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(aerial ? 48 : 58, window.innerWidth / window.innerHeight, 0.12, 1400);
+const sky = createSky(scene, aerial ? { near: 90, far: 760 } : { near: 45, far: 360 });
+const city = createCity(scene, makeRng(seed));
+const player = createPlayer();
+scene.add(player.mesh);
+const rig = createChaseCamera();
+const input = createInput(canvas);
+const focus = new THREE.Vector3();
+
+if (shot) {
+  player.mesh.position.set(shot.x, 0, shot.z);
+  player.mesh.rotation.y = shot.face;
+  rig.yaw = shot.yaw;
+  rig.pitch = shot.pitch;
+  rig.dist = shot.dist;
+  rig.lookY = shot.lookY;
+  rig.frozen = true;
+} else {
+  player.mesh.position.set(city.spawn.x, 0, city.spawn.z);
 }
 
-function saveBest(value) {
-  try {
-    window.localStorage.setItem(BEST_KEY, String(value));
-  } catch {
-    // Storage can be off (private windows): the best score then lasts this visit only.
+function frameFocus() {
+  if (aerial) {
+    focus.set(GRID_X * SPAN * 0.48, shot.lookY, GRID_Z * SPAN * 0.38);
+    return;
   }
+  focus.set(player.mesh.position.x, rig.lookY + player.mesh.position.y, player.mesh.position.z);
 }
 
-function runShot(name) {
-  const scene = stageShot(name, world);
-  let painted = 0;
-  function paint() {
-    renderer.draw(world.state, scene.screen, scene.best);
-    painted += 1;
-    if (painted < 2) requestAnimationFrame(paint);
-    else window.__shotReady = true;
-  }
-  requestAnimationFrame(paint);
+function placeCamera() {
+  frameFocus();
+  updateChaseCamera(camera, rig, focus);
+  sky.follow(focus, aerial ? 100 : Math.max(28, rig.dist * 1.4));
 }
 
-function runGame() {
-  const input = createInput(canvas);
-  let screen = SCREEN_TITLE;
-  let best = readBest();
-  let accumulator = 0;
-  let last = performance.now();
+function resize() {
+  camera.aspect = window.innerWidth / Math.max(1, window.innerHeight);
+  camera.updateProjectionMatrix();
+  renderer.setSize(window.innerWidth, window.innerHeight);
+}
+window.addEventListener('resize', resize);
 
-  // Screen readers (and anyone watching the page's text) hear the screen changes and each hit.
-  function announce(message) {
-    status.textContent = message;
+let last = performance.now();
+placeCamera();
+
+function tick(now) {
+  const dt = Math.min(0.05, (now - last) / 1000);
+  last = now;
+  if (!rig.frozen) {
+    const sample = input.sample();
+    const basis = planarBasis(camera);
+    const wishX = basis.fwd.x * sample.forward + basis.right.x * sample.strafe;
+    const wishZ = basis.fwd.z * sample.forward + basis.right.z * sample.strafe;
+    updatePlayer(player, wishX, wishZ, dt, city.colliders, sample);
+    applyMouseLook(rig, sample);
   }
-
-  function startGame() {
-    world.reset();
-    accumulator = 0;
-    screen = SCREEN_PLAY;
-    announce(`Playing. ${LIVES} lives.`);
-  }
-
-  function endGame() {
-    screen = SCREEN_OVER;
-    if (world.state.score > best) {
-      best = world.state.score;
-      saveBest(best);
-    }
-    announce(`Game over. Score ${world.state.score}. Best ${best}.`);
-  }
-
-  function handleActions() {
-    const actions = input.takeActions();
-    if (actions & ACTION_CONFIRM && (screen === SCREEN_TITLE || screen === SCREEN_OVER)) startGame();
-    else if (actions & ACTION_PAUSE && screen === SCREEN_PLAY) {
-      screen = SCREEN_PAUSED;
-      announce('Paused.');
-    } else if (actions & (ACTION_PAUSE | ACTION_CONFIRM) && screen === SCREEN_PAUSED) {
-      screen = SCREEN_PLAY;
-      announce('Playing.');
-    }
-  }
-
-  function step() {
-    if (screen === SCREEN_TITLE) {
-      world.step(STEP, 0, true);
-      return;
-    }
-    const events = world.step(STEP, input.direction(), false);
-    if (events & EVENT_OVER) endGame();
-    else if (events & EVENT_HIT) announce(world.state.lives === 1 ? 'Hit. 1 life left.' : `Hit. ${world.state.lives} lives left.`);
-  }
-
-  function frame(now) {
-    requestAnimationFrame(frame);
-    accumulator += Math.min((now - last) / 1000, MAX_FRAME);
-    last = now;
-    handleActions();
-    if (screen === SCREEN_TITLE || screen === SCREEN_PLAY) {
-      while (accumulator >= STEP && (screen === SCREEN_TITLE || screen === SCREEN_PLAY)) {
-        step();
-        accumulator -= STEP;
-      }
-    } else {
-      accumulator = 0;
-    }
-    renderer.draw(world.state, screen, best);
-  }
-
-  // Leaving the tab pauses a running game rather than letting blocks fall unseen.
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden && screen === SCREEN_PLAY) {
-      screen = SCREEN_PAUSED;
-      announce('Paused.');
-    }
-  });
-
-  announce('Block Dodger. Press Space or click to start.');
-  requestAnimationFrame(frame);
+  placeCamera();
+  const district = districtAt(player.mesh.position.x, player.mesh.position.z);
+  if (districtEl.textContent !== district) districtEl.textContent = district;
+  statusEl.textContent = 'Port Solano. Rafa Quill, on foot in ' + district + '.';
+  renderer.render(scene, camera);
+  requestAnimationFrame(tick);
 }
 
-if (shot) runShot(shot);
-else runGame();
+requestAnimationFrame(tick);
