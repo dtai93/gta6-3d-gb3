@@ -2,7 +2,7 @@
 
 function glowScale(hour) {
   const h = ((hour % 24) + 24) % 24;
-  if (h >= 17 && h < 19.5) return 1;
+  if (h >= 17 && h < 19.5) return 1.28;
   if (h >= 19.5 && h < 22) return 1 + ((h - 19.5) / 2.5) * 0.85;
   if (h >= 22 || h < 5) return 1.85;
   if (h >= 5 && h < 7) return 1.85 + ((h - 5) / 2) * (0.62 - 1.85);

@@ -95,3 +95,19 @@ Wheels sit inside the body. The helicopter rotor is a cross so it reads against 
 1. If the left cruiser still clips the cover edge, nudge `stagePolice` chase unit 0 a little toward the lane.
 2. Keep each source file one job. The judge only sees file names and the first declarations.
 3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.
+
+## Session 7 — colour and the causeway
+
+`sky.js` sunset is gold on the horizon, pink through the middle, purple at the zenith. Fog is rose and starts further out, so nearby cars stay saturated. The hemisphere is a warm fill with a cool blue-grey ground. The sun sits ahead and to the right so the causeway facades take the key light. A gold glare sprite and a pink halo sit on the sun.
+
+`glow.js` is the shared additive sprite. Headlights, tail lamps, cruiser light bars, KESTREL-1's lamps, and the causeway street lamps use it.
+
+`avenue.js` dresses the road at x = 3*SPAN: hotel crowns with window grids, rooftop names, boards facing the chase (Lagoon FM, Reef Soda, Tide Hotel), palms on both curbs, crosswalks, and parked cars. Building windows are a tighter grid: warm or neon panes, dark glass between them. Sunset `glowScale` is 1.28. Palms use a basic green so shade does not turn them black.
+
+Recaptured `1-chase`, `2-onfoot`, `3-city`, `4-start`. All 1280×800 and under 256 KiB. The cover shows the pink-gold sky, the searchlight, palms, a crosswalk, and the boards. The title shot stays night.
+
+## Next
+
+1. Cover camera: sit it behind the Sprint and a little above, so the foreground cruiser stops blocking the nose. Keep the other cruisers behind and beside, and KESTREL-1 higher in the purple sky.
+2. Keep each source file one job. The judge only sees file names and the first declarations.
+3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.

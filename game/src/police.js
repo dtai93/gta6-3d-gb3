@@ -2,6 +2,7 @@
 // stars. KESTREL-1, the helicopter, lifts off at three with a searchlight.
 
 import * as THREE from '../vendor/three.module.min.js';
+import { addGlow } from './glow.js';
 import { SPAN } from './config.js';
 import { createVehicle, pushCircle, syncVehicle, yawForward, yawFromDir } from './vehicles.js';
 
@@ -62,8 +63,10 @@ function helicopterMesh() {
   const beamGeo = new THREE.ConeGeometry(5.2, 20, 8, 1, true);
   beamGeo.translate(0, -10, 0);
   const beam = new THREE.Mesh(beamGeo, new THREE.MeshBasicMaterial({
-    color: 0xfff2cc, transparent: true, opacity: 0.16, depthWrite: false, side: THREE.DoubleSide,
+    color: 0xfff6d8, transparent: true, opacity: 0.22, depthWrite: false, side: THREE.DoubleSide,
   }));
+  addGlow(red, 0, 0, 0, 0xff2430, 1.6);
+  addGlow(blue, 0, 0, 0, 0x3d7bff, 1.6);
   mesh.add(body, tail, fin, rotor, tailRotor, glass, red, blue, beam);
   const spot = new THREE.SpotLight(0xfff4d2, 0, 96, 0.42, 0.5, 0.85);
   spot.position.set(0, -0.2, 0.2);

@@ -3,13 +3,14 @@
 import * as THREE from '../vendor/three.module.min.js';
 import { SPAN, ROAD_W, GRID_X, GRID_Z, blockBounds, districtOf } from './config.js';
 import { rngInt, pick } from './rng.js';
+import { dressAvenue } from './avenue.js';
 
 const PALETTE = {
-  'Coral Shore': [0xf3e2cc, 0xf7f3ea, 0xe8cbb0, 0xf0d0c4],
-  'Old Harbor': [0xb9a08a, 0x8e7566, 0xcbbba8, 0x6f7d88],
-  'Neon Strip': [0x2a3148, 0x3c345c, 0x232838, 0x1b2433],
-  'Palm Heights': [0xf0d8b0, 0xe7e0d2, 0xd5c2a2, 0xc9d4cc],
-  'Industrial Docks': [0x8b9198, 0x6e757b, 0xa4a9af, 0x5d656c],
+  'Coral Shore': [0xffe4c4, 0xfff8ef, 0xf0a088, 0xf7cbb4],
+  'Old Harbor': [0xd2b498, 0xa88870, 0xe4d2bc, 0x7f8e9a],
+  'Neon Strip': [0x1a2236, 0x2c2448, 0x141a28, 0x101620],
+  'Palm Heights': [0xffe6c2, 0xf4efe4, 0xe4d0a8, 0xd5e4d8],
+  'Industrial Docks': [0x9aa2aa, 0x727a82, 0xb4bac0, 0x5c656e],
 };
 
 const FLOORS = {
@@ -42,11 +43,14 @@ function paintBox() {
   const col = new Float32Array(pos.count * 3);
   for (let i = 0; i < pos.count; i++) {
     const up = nrm.getY(i) > 0.6;
-    const shade = up ? 0.8 : 0.48 + pos.getY(i) * 0.45;
-    const side = Math.abs(nrm.getX(i)) > 0.5 ? 0.88 : 1;
-    col[i * 3] = shade * side;
-    col[i * 3 + 1] = shade * side * 0.97;
-    col[i * 3 + 2] = shade * side * 0.92;
+    const nx = nrm.getX(i);
+    const shade = up ? 0.94 : 0.5 + pos.getY(i) * 0.42;
+    const lit = nx > 0.4;
+    const warm = lit ? 1.12 : 0.9;
+    const cool = lit ? 0.94 : 1.0;
+    col[i * 3] = shade * warm;
+    col[i * 3 + 1] = shade * 0.98;
+    col[i * 3 + 2] = shade * cool;
   }
   geo.setAttribute('color', new THREE.BufferAttribute(col, 3));
   return geo;
@@ -93,7 +97,7 @@ export function createCity(scene, rng) {
 
   const asphalt = new THREE.Mesh(
     new THREE.PlaneGeometry(cityW + 36, cityD + 36),
-    new THREE.MeshLambertMaterial({ color: 0x3a4048 }),
+    new THREE.MeshLambertMaterial({ color: 0x2a313c }),
   );
   asphalt.rotation.x = -Math.PI / 2;
   asphalt.position.set(cityW / 2, 0, cityD / 2);
@@ -102,7 +106,7 @@ export function createCity(scene, rng) {
 
   const beach = new THREE.Mesh(
     new THREE.PlaneGeometry(cityW + 90, 42),
-    new THREE.MeshLambertMaterial({ color: 0xe7d2a2 }),
+    new THREE.MeshLambertMaterial({ color: 0xf2d6a4 }),
   );
   beach.rotation.x = -Math.PI / 2;
   beach.position.set(cityW / 2, 0.02, -17);
@@ -111,7 +115,7 @@ export function createCity(scene, rng) {
 
   const water = new THREE.Mesh(
     new THREE.PlaneGeometry(cityW + 520, 480),
-    new THREE.MeshLambertMaterial({ color: 0x166f8c }),
+    new THREE.MeshLambertMaterial({ color: 0x1498b4 }),
   );
   water.rotation.x = -Math.PI / 2;
   water.position.set(cityW / 2, -0.45, -280);
@@ -180,13 +184,14 @@ export function createCity(scene, rng) {
   const lamps = addLamps(root);
   addCars(root, rng);
   addSigns(root);
+  const avenueGlow = dressAvenue(root, builds);
 
   return {
     colliders,
     spawn: { x: SPAN * 3, z: SPAN * 1.15 },
     root,
     builds,
-    glow: [glow.windows, glow.bands, lamps],
+    glow: [glow.windows, glow.bands, lamps].concat(avenueGlow),
   };
 }
 
@@ -221,28 +226,30 @@ function addWindows(root, builds) {
   for (let i = 0; i < builds.length; i++) {
     const b = builds[i];
     const rows = Math.max(1, Math.floor((b.h - 1.2) / 3.05));
-    const colsX = Math.max(1, Math.floor(b.bw / 2.7));
-    const colsZ = Math.max(1, Math.floor(b.bd / 2.7));
+    const colsX = Math.max(2, Math.floor(b.bw / 1.85));
+    const colsZ = Math.max(2, Math.floor(b.bd / 1.85));
     const neon = b.name === 'Neon Strip';
     for (let row = 0; row < rows; row++) {
       const y = 1.7 + row * 3.05;
       for (let c = 0; c < colsX; c++) {
         const x = b.cx - b.bw / 2 + (c + 0.5) * (b.bw / colsX);
-        const lit = neon ? ((c + row) % 2 ? 0x3df0dc : 0xff3b8a) : ((row + c) % 4 === 0 ? 0xffd7a4 : 0x9ec8d6);
-        spots.push([x, y, b.cz + b.bd / 2 + 0.08, 0.9, 1.15, 0.08, lit]);
-        spots.push([x, y, b.cz - b.bd / 2 - 0.08, 0.9, 1.15, 0.08, lit]);
+        const lit = neon ? ((c + row) % 2 ? 0x5ff6ea : 0xff4d9a) : ((row + c) % 3 === 0 ? 0xffe7b0 : 0x152033);
+        spots.push([x, y, b.cz + b.bd / 2 + 0.08, 0.52, 0.78, 0.06, lit]);
+        spots.push([x, y, b.cz - b.bd / 2 - 0.08, 0.52, 0.78, 0.06, lit]);
       }
       for (let c = 0; c < colsZ; c++) {
         const z = b.cz - b.bd / 2 + (c + 0.5) * (b.bd / colsZ);
-        const lit = neon ? ((c + row) % 2 ? 0xff3b8a : 0x3df0dc) : ((row + c) % 4 === 0 ? 0xffd7a4 : 0x9ec8d6);
-        spots.push([b.cx + b.bw / 2 + 0.08, y, z, 0.08, 1.15, 0.9, lit]);
-        spots.push([b.cx - b.bw / 2 - 0.08, y, z, 0.08, 1.15, 0.9, lit]);
+        const lit = neon ? ((c + row) % 2 ? 0xff4d9a : 0x5ff6ea) : ((row + c) % 3 === 0 ? 0xffe7b0 : 0x152033);
+        spots.push([b.cx + b.bw / 2 + 0.08, y, z, 0.06, 0.78, 0.52, lit]);
+        spots.push([b.cx - b.bw / 2 - 0.08, y, z, 0.06, 0.78, 0.52, lit]);
       }
     }
     if (neon) {
       const glow = i % 2 ? 0xff2d78 : 0x24f0d4;
       bands.push([b.cx, b.h - 0.45, b.cz + b.bd / 2, b.bw * 0.92, 0.7, 0.28, glow]);
       bands.push([b.cx, b.h - 0.45, b.cz - b.bd / 2, b.bw * 0.92, 0.7, 0.28, glow]);
+      bands.push([b.cx + b.bw / 2, b.h - 0.45, b.cz, 0.28, 0.7, b.bd * 0.92, glow]);
+      bands.push([b.cx - b.bw / 2, b.h - 0.45, b.cz, 0.28, 0.7, b.bd * 0.92, glow]);
     }
   }
   return {
@@ -255,14 +262,14 @@ function palmGeometry() {
   const bits = [];
   const trunk = new THREE.CylinderGeometry(0.1, 0.16, 3.2, 5).toNonIndexed();
   trunk.translate(0, 1.6, 0);
-  bits.push([trunk, 0.58, 0.4, 0.22]);
+  bits.push([trunk, 0.78, 0.52, 0.3]);
   for (let i = 0; i < 5; i++) {
     const frond = new THREE.ConeGeometry(0.14, 1.7, 4).toNonIndexed();
     frond.translate(0, 0.85, 0);
     frond.rotateZ(1.25);
     frond.rotateY((i / 5) * Math.PI * 2);
     frond.translate(0, 3.3, 0);
-    bits.push([frond, 0.15, 0.5, 0.24]);
+    bits.push([frond, 0.28, 0.78, 0.36]);
   }
   let count = 0;
   for (let k = 0; k < bits.length; k++) count += bits[k][0].attributes.position.count;
@@ -305,7 +312,7 @@ function addPalms(root, rng, cityW) {
   }
   const mesh = new THREE.InstancedMesh(
     palmGeometry(),
-    new THREE.MeshLambertMaterial({ vertexColors: true }),
+    new THREE.MeshBasicMaterial({ vertexColors: true }),
     spots.length,
   );
   mesh.castShadow = true;
@@ -335,7 +342,7 @@ function addLamps(root) {
   return spawnColored(root, bulbGeo, GLOW, bulbs);
 }
 
-const CAR_COLORS = [0xc43737, 0xf4f4f4, 0x1c1e24, 0xe0a030, 0x2d6e9c, 0xd9d4cb];
+const CAR_COLORS = [0xe10600, 0xf6f7f8, 0x14171c, 0xf0c400, 0x1f78d0, 0xff6a14];
 
 function addCars(root, rng) {
   const bodies = [];

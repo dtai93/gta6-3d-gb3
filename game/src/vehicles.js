@@ -3,20 +3,21 @@
 
 import * as THREE from '../vendor/three.module.min.js';
 import { GRID_X, GRID_Z, SPAN } from './config.js';
+import { addGlow } from './glow.js';
 
 export const CAR_TYPES = [
-  { name: 'Solano Sprint', color: 0xc43737, length: 4.25, width: 1.82, height: 0.42, cabinL: 1.65, cabinH: 0.36, cabinZ: -0.2, accel: 18, brake: 30, max: 32, steer: 1.85, extra: 'sport' },
-  { name: 'Harbor Cab', color: 0xf0c230, length: 4.45, width: 1.78, height: 0.52, cabinL: 2.15, cabinH: 0.46, cabinZ: 0.05, accel: 11, brake: 22, max: 22, steer: 1.5, extra: 'taxi' },
+  { name: 'Solano Sprint', color: 0xde1c28, length: 4.25, width: 1.82, height: 0.42, cabinL: 1.65, cabinH: 0.36, cabinZ: -0.2, accel: 18, brake: 30, max: 32, steer: 1.85, extra: 'sport' },
+  { name: 'Harbor Cab', color: 0xf5c400, length: 4.45, width: 1.78, height: 0.52, cabinL: 2.15, cabinH: 0.46, cabinZ: 0.05, accel: 11, brake: 22, max: 22, steer: 1.5, extra: 'taxi' },
   { name: 'Dock Hauler', color: 0x2c6b52, length: 4.9, width: 1.95, height: 0.92, cabinL: 1.45, cabinH: 0.55, cabinZ: -1.25, accel: 8, brake: 16, max: 17, steer: 1.25, extra: 'van' },
   { name: 'Port Sentinel', color: 0x1b2430, length: 4.55, width: 1.82, height: 0.5, cabinL: 2.1, cabinH: 0.44, cabinZ: 0.08, accel: 14, brake: 26, max: 28, steer: 1.55, extra: 'police' },
-  { name: 'Reef Runner', color: 0xe07a28, length: 4.75, width: 1.88, height: 0.46, cabinL: 1.5, cabinH: 0.4, cabinZ: 0.55, accel: 15, brake: 22, max: 30, steer: 1.4, extra: 'muscle' },
+  { name: 'Reef Runner', color: 0xff6410, length: 4.75, width: 1.88, height: 0.46, cabinL: 1.5, cabinH: 0.4, cabinZ: 0.55, accel: 15, brake: 22, max: 30, steer: 1.4, extra: 'muscle' },
 ];
 
 const BOX = new THREE.BoxGeometry(1, 1, 1);
 const WHEEL_GEO = new THREE.CylinderGeometry(0.33, 0.33, 0.22, 8);
 WHEEL_GEO.rotateZ(Math.PI / 2);
 const HEAD_GEO = new THREE.SphereGeometry(0.12, 6, 5);
-const GLASS = new THREE.MeshLambertMaterial({ color: 0xb7d4e2 });
+const GLASS = new THREE.MeshLambertMaterial({ color: 0x8ec4dc });
 const RUBBER = new THREE.MeshLambertMaterial({ color: 0x1a1c20 });
 const SKIN = new THREE.MeshLambertMaterial({ color: 0xd9a27a });
 const SHIRT = new THREE.MeshLambertMaterial({ color: 0x243044 });
@@ -87,6 +88,10 @@ function buildCar(type) {
   group.add(box(headMat, W * 0.32, bodyY * 0.92, nose - 0.02, 0.28, 0.14, 0.06));
   group.add(box(TAIL, -W * 0.32, bodyY * 0.9, tail + 0.02, 0.3, 0.14, 0.06));
   group.add(box(TAIL, W * 0.32, bodyY * 0.9, tail + 0.02, 0.3, 0.14, 0.06));
+  addGlow(group, -W * 0.32, bodyY * 0.92, nose - 0.08, 0xfff3c4, 0.95);
+  addGlow(group, W * 0.32, bodyY * 0.92, nose - 0.08, 0xfff3c4, 0.95);
+  addGlow(group, -W * 0.32, bodyY * 0.9, tail + 0.08, 0xff2a30, 0.62);
+  addGlow(group, W * 0.32, bodyY * 0.9, tail + 0.08, 0xff2a30, 0.62);
   const wheels = [];
   const wz = L * 0.32;
   const wx = W * 0.36;
@@ -112,6 +117,8 @@ function buildCar(type) {
     const red = box(POLICE_RED, -0.18, y + 0.16, type.cabinZ, 0.24, 0.12, 0.2);
     const blue = box(POLICE_BLUE, 0.18, y + 0.16, type.cabinZ, 0.24, 0.12, 0.2);
     group.add(box(RUBBER, 0, y + 0.06, type.cabinZ, 0.72, 0.08, 0.28), red, blue);
+    addGlow(red, 0, 0, 0, 0xff2430, 1.15);
+    addGlow(blue, 0, 0, 0, 0x3d7bff, 1.15);
     lights = [red, blue];
   }
   const driver = new THREE.Group();

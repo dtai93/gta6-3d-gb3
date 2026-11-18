@@ -53,7 +53,7 @@ renderer.toneMappingExposure = 1.05;
 
 const scene = new THREE.Scene();
 const camera = new THREE.PerspectiveCamera(baseFov, window.innerWidth / window.innerHeight, 0.12, 1400);
-const sky = createSky(scene, wide ? { near: 90, far: 760 } : { near: 45, far: 360 });
+const sky = createSky(scene, wide ? { near: 140, far: 980 } : { near: 78, far: 540 });
 const city = createCity(scene, makeRng(seed));
 const player = createPlayer();
 scene.add(player.mesh);
@@ -487,7 +487,8 @@ function placeCamera() {
   const hour = (dayClock / 3600) % 24;
   updateSkyHour(sky, hour);
   updateNeon(neon, hour);
-  renderer.toneMappingExposure = (hour >= 20 || hour < 5) ? 0.98 : 1.05;
+  const sunset = hour >= 17 && hour < 19.5;
+  renderer.toneMappingExposure = (hour >= 20 || hour < 5) ? 0.9 : sunset ? 1.2 : 1.08;
   frameFocus();
   updateChaseCamera(camera, rig, focus);
   sky.follow(focus, (shotName === 'city' || !playing) ? 100 : Math.max(28, rig.dist * 1.4));
