@@ -127,3 +127,15 @@ Recaptured `screenshots/1-chase.jpg` (1280×800, 156 KiB) and checked a 768×480
 1. If MARLIN-11 still sits on the vanishing point, nudge its chase slot further left. Speed streaks are thin at 768; thicken them only if the car stays clear.
 2. Keep each source file one job. The judge only sees file names and the first declarations.
 3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.
+
+## Session 10 — ship
+
+`README.md` has the title, a one-paragraph description, the feature list, controls, `node serve.ts`, the three make.fun badges, and the make.fun footer. That commit was pushed before the checks below.
+
+Headless Chrome on port 18801: `?test=1&seed=1` reports `drive-test ok`. `?shot=chase|onfoot|city|start&seed=1` each load with no console error and no page exception. `MAKEFUN_OUTPUT_DIR=/tmp/g6out node main.ts` writes `dossier.json` and copies `game/` plus the four screenshots. `main.ts` is the Port Solano hand-in, not the starter. `vendor/makefun-game.ts` matches the committed blob. All four JPEGs are 1280×800 and under 256 KiB. `shots.json` names `1-chase.jpg`, `2-onfoot.jpg`, `3-city.jpg`, `4-start.jpg`.
+
+Looked at the four frames. Cover stays the causeway chase: four stars, three cruisers, KESTREL-1, mission panel, police call-signs, minimap, weapons, speedometer, and Nia's line. No art change this session.
+
+## Next
+
+Submit from the kit once the recording is sealed. Do not replace `1-chase.jpg`. Keep `vendor/makefun-game.ts` and `LICENSE` untouched.
