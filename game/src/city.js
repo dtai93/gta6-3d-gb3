@@ -64,7 +64,7 @@ function compose(mesh, i, x, y, z, sx, sy, sz, color, yaw) {
 }
 
 function spawnColored(root, geo, mat, spots, shadow) {
-  if (!spots.length) return;
+  if (!spots.length) return null;
   const mesh = new THREE.InstancedMesh(geo, mat, spots.length);
   if (shadow) mesh.castShadow = true;
   for (let i = 0; i < spots.length; i++) {
@@ -74,6 +74,7 @@ function spawnColored(root, geo, mat, spots, shadow) {
   mesh.instanceMatrix.needsUpdate = true;
   if (mesh.instanceColor) mesh.instanceColor.needsUpdate = true;
   root.add(mesh);
+  return mesh;
 }
 
 export function districtAt(x, z) {
@@ -174,13 +175,19 @@ export function createCity(scene, rng) {
   root.add(buildingMesh);
 
   addMarkings(root, cityW, cityD);
-  addWindows(root, builds);
+  const glow = addWindows(root, builds);
   addPalms(root, rng, cityW);
-  addLamps(root);
+  const lamps = addLamps(root);
   addCars(root, rng);
   addSigns(root);
 
-  return { colliders, spawn: { x: SPAN * 3, z: SPAN * 1.15 }, root, builds };
+  return {
+    colliders,
+    spawn: { x: SPAN * 3, z: SPAN * 1.15 },
+    root,
+    builds,
+    glow: [glow.windows, glow.bands, lamps],
+  };
 }
 
 const BOX = new THREE.BoxGeometry(1, 1, 1);
@@ -238,8 +245,10 @@ function addWindows(root, builds) {
       bands.push([b.cx, b.h - 0.45, b.cz - b.bd / 2, b.bw * 0.92, 0.7, 0.28, glow]);
     }
   }
-  spawnColored(root, BOX, GLOW, spots);
-  spawnColored(root, BOX, GLOW, bands);
+  return {
+    windows: spawnColored(root, BOX, GLOW, spots),
+    bands: spawnColored(root, BOX, GLOW, bands),
+  };
 }
 
 function palmGeometry() {
@@ -323,7 +332,7 @@ function addLamps(root) {
   poleGeo.translate(0, 0.5, 0);
   spawnColored(root, poleGeo, new THREE.MeshLambertMaterial({ color: 0xffffff }), poles, true);
   const bulbGeo = new THREE.SphereGeometry(0.5, 6, 5);
-  spawnColored(root, bulbGeo, GLOW, bulbs);
+  return spawnColored(root, bulbGeo, GLOW, bulbs);
 }
 
 const CAR_COLORS = [0xc43737, 0xf4f4f4, 0x1c1e24, 0xe0a030, 0x2d6e9c, 0xd9d4cb];

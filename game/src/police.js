@@ -397,6 +397,8 @@ export function policeRoster(police, x, z) {
       callsign: car.callsign,
       role: car.role.toUpperCase(),
       dist: Math.hypot(car.x - x, car.z - z),
+      x: car.x,
+      z: car.z,
       kind: 'car',
     });
   }
@@ -407,6 +409,8 @@ export function policeRoster(police, x, z) {
       callsign: cop.callsign,
       role: cop.down > 0 ? 'DOWN' : 'FOOT',
       dist: Math.hypot(cop.x - x, cop.z - z),
+      x: cop.x,
+      z: cop.z,
       kind: 'foot',
     });
   }
@@ -415,6 +419,8 @@ export function policeRoster(police, x, z) {
       callsign: police.callsign,
       role: 'AIR',
       dist: Math.hypot(police.hx - x, police.hz - z),
+      x: police.hx,
+      z: police.hz,
       kind: 'air',
     });
   }

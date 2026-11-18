@@ -54,10 +54,32 @@ Driveable traffic. `vehicles.js` builds five cars (Solano Sprint, Harbor Cab, Do
 
 `?test=1` reports `drive-test ok` (old drive checks plus fist, gun, heat, cruiser chase, hospital, bust). `?shot=chase&seed=1` freezes a Solano Sprint with three cruisers, OSPREY-3, and KESTREL-1. `screenshots/1-chase.jpg` is that frame (1280×800, under 256 KiB). A temporary right-hand heat panel lists stars, HP, armour, cash, the driven car or weapon, and unit call-signs. It is not the final HUD.
 
+## Session 4 — missions, story, HUD
+
+`dialogue.js` — cast and canvas portraits: Rafa Quill, Nia Voss, Mateo Sol, Cleo Marsh, Jun Park, Inez Calder, Lalo Brine.
+
+`missions.js` — six jobs with a gold beacon and staged objectives. Coral Drop (delivery), Yellow Shadow (tail a Harbor Cab), The Tide Job (Sprint getaway), Vesper Take (hold-up), Yard Lights (boat-yard heist), Brine's Cut (finale). Walking into the next marker starts the job, pays cash, and opens a mission-complete card. `?shot=` locks a staged moment: chase is mission 3 stage 2, on foot is mission 4, city is mission 1.
+
+`hud.js` plus the overlay in `index.html` — mission panel (stage, title, objective, bar, NEXT), wanted stars, cash, day and clock, police response with call-signs, circular minimap (roads, north, yellow objective, red units, district), health and armour, four weapon slots with ammo, speedometer with vehicle name and condition, radio now-playing, dialogue with portrait, notice line. Q cycles stations in `radio.js`. The temporary heat panel is gone. `#complete` uses `[hidden]` so `display:flex` does not force the payoff card on screen.
+
+`?test=1` still reports `ok`. Cover `screenshots/1-chase.jpg` is the causeway chase (4 stars, three cruisers, KESTREL-1, full HUD, Nia on the radio line). `2-onfoot.jpg` and `3-city.jpg` were retaken with the same HUD. All three are 1280×800 and under 256 KiB. `4-start.jpg` is still missing.
+
 ## Next
 
-1. Full HUD shell (mission, wanted, cash, clock, circular minimap, health, weapon slots, speedo, radio, dialogue) and replace the temporary heat panel.
-2. Mission flow, save, title screen.
-3. Retake all 4 shots. Only `1-chase.jpg` and `3-city.jpg` are in `screenshots/` right now, so the gate's 3-image minimum is not met until `2-onfoot.jpg` and `4-start.jpg` exist. Cover is `1-chase.jpg`.
-4. Tighten car silhouettes before the final cover; wheels still sit outside the body. Pull the helicopter a little larger in frame if the final chase camera allows it.
-5. Keep each source file one job. The judge only sees file names and the first declarations.
+1. Tighten car silhouettes; wheels still sit outside the body. Pull KESTREL-1 a little larger in the chase frame if the camera allows it.
+2. Keep each source file one job. The judge only sees file names and the first declarations.
+3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.
+
+## Session 5 — menus, save, audio, juice
+
+`menus.js` — title card (PORT SOLANO, New Game / Continue / Controls / Settings, save-slot preview), pause menu, controls and settings sheets. Escape pauses. The title hides the HUD. `?shot=start` freezes a night flyover behind the card. Chase, on-foot, and city shots stay in play with no menu.
+
+`save.js` — one localStorage slot. Walking into the Coral Shore safehouse (road at 44, 22) clears wanted heat and writes the slot. Finishing a job autosaves. Pause can save manually. Continue restores health, cash, heat, clock, radio, weapons, and mission stage.
+
+`mapscreen.js` — M opens a full-city map (roads, districts, safehouse, job blip, police). Escape or M closes it.
+
+`audio.js` — Web Audio synth. Engine pitch follows speed, sirens while wanted, gunshots, crashes, footsteps. Three generative stations (Lagoon FM, Harbor Wire, Neon After); Dock Static and Palm Hours reuse those voices. Q still cycles the dial in `radio.js`. Settings sliders set master, radio, and look speed.
+
+`daynight.js` plus `updateSkyHour` in `sky.js` — 17:00–19:30 stays the existing sunset (chase is 18:42). Later hours go blue and `updateNeon` lifts windows, parapet bands, and lamps. `fx.js` adds sparks, smoke, dust, and muzzle points. Landing, guns, and crashes shake the camera without changing its look direction. Speed adds a little FOV and camera distance.
+
+`?test=1` reports `drive-test ok` with no page exceptions. `screenshots/4-start.jpg` is the night title (1280×800, under 256 KiB). Cover `1-chase.jpg` was not replaced. A fresh chase render still shows sunset, four stars, cruisers, KESTREL-1, and the full HUD.

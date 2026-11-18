@@ -25,7 +25,13 @@ export function createChaseCamera() {
     dist: CAM.dist,
     lookY: CAM.lookY,
     frozen: false,
+    shake: 0,
+    shakeT: 0,
   };
+}
+
+export function addCameraShake(rig, amount) {
+  rig.shake = Math.min(0.85, rig.shake + amount);
 }
 
 export function updateChaseCamera(camera, rig, focus) {
@@ -41,6 +47,16 @@ export function updateChaseCamera(camera, rig, focus) {
   const y = focus.y + lift;
   camera.position.set(focus.x - lx * back, y, focus.z - lz * back);
   camera.lookAt(focus.x, focus.y, focus.z);
+  // Position-only kick. Rotation stays aimed at focus, so planarBasis does not wobble.
+  if (rig.shake > 0.001) {
+    rig.shakeT += 1;
+    const s = rig.shake;
+    const t = rig.shakeT;
+    camera.position.x += Math.sin(t * 1.7) * s * 0.2;
+    camera.position.y += Math.cos(t * 2.4) * s * 0.12;
+    camera.position.z += Math.sin(t * 1.3) * s * 0.2;
+    rig.shake *= 0.9;
+  }
 }
 
 export function applyMouseLook(rig, sample) {

@@ -108,7 +108,9 @@ export function updatePlayer(player, wishX, wishZ, dt, colliders, sample) {
   }
   player.vy -= PLAYER.gravity * dt;
   let y = player.mesh.position.y + player.vy * dt;
+  player.impact = 0;
   if (y <= 0) {
+    if (!player.grounded && player.vy < -7) player.impact = Math.min(0.7, (-player.vy - 7) / 12);
     y = 0;
     player.vy = 0;
     player.grounded = true;

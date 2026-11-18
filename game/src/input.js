@@ -53,6 +53,9 @@ export function createInput(dom) {
 
   return {
     get locked() { return mouse.locked; },
+    release() {
+      if (document.exitPointerLock) document.exitPointerLock();
+    },
     sample() {
       const forward = (held(keys, FORWARD) ? 1 : 0) - (held(keys, BACK) ? 1 : 0);
       const strafe = (held(keys, RIGHT) ? 1 : 0) - (held(keys, LEFT) ? 1 : 0);
@@ -67,6 +70,9 @@ export function createInput(dom) {
         aim: buttons.has(2),
         reload: edges.has('KeyR'),
         slot: edges.has('Digit1') ? 1 : edges.has('Digit2') ? 2 : edges.has('Digit3') ? 3 : edges.has('Digit4') ? 4 : 0,
+        radio: edges.has('KeyQ'),
+        pause: edges.has('Escape'),
+        map: edges.has('KeyM'),
         yaw: mouse.dx,
         pitch: mouse.dy,
       };

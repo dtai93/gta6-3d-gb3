@@ -7,43 +7,150 @@
 <style>
   html, body { margin: 0; height: 100%; overflow: hidden; background: #1a120e; }
   #view { position: fixed; inset: 0; width: 100%; height: 100%; display: block; }
-  #hud { position: fixed; inset: 0; pointer-events: none; }
-  #place {
-    position: absolute; top: 18px; left: 18px;
-    color: #fff6ea; font: 600 13px/1.3 sans-serif; letter-spacing: 0.14em;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.6);
-  }
-  #district { font: 700 22px/1.2 sans-serif; letter-spacing: 0.04em; }
-  #heat {
-    position: absolute; top: 16px; right: 16px; text-align: right;
-    color: #fff6ea; font: 700 14px/1.35 sans-serif;
-    text-shadow: 0 1px 2px rgba(0,0,0,0.7);
-  }
-  #stars { color: #ffc14a; letter-spacing: 0.16em; font-size: 20px; }
-  #units { white-space: pre-line; font-weight: 600; color: #d7ecff; }
-  #crosshair {
-    position: absolute; left: 50%; top: 46%; width: 16px; height: 16px;
-    margin: -8px 0 0 -8px; border: 2px solid rgba(255,246,234,0.92); border-radius: 50%;
-  }
+  #hud { position: fixed; inset: 0; pointer-events: none; color: #fff8ee; font-family: "Segoe UI", sans-serif; }
   #status { position: absolute; width: 1px; height: 1px; overflow: hidden; clip-path: inset(50%); }
+  .panel { background: rgba(10,12,18,0.78); border: 1px solid rgba(255,236,214,0.28); box-shadow: 0 8px 22px rgba(0,0,0,0.35); }
+  #mission { position: absolute; top: 14px; left: 14px; width: 392px; padding: 12px 14px 12px; }
+  #mission-kicker { font: 800 12px/1 sans-serif; letter-spacing: 0.16em; color: #ffb089; }
+  #mission-title { font: 800 20px/1.15 sans-serif; margin-top: 3px; }
+  #mission-text { font: 600 16px/1.3 sans-serif; margin-top: 4px; }
+  #mission-bar { height: 10px; margin-top: 8px; background: #2a3038; border-radius: 5px; overflow: hidden; }
+  #mission-fill { display: block; height: 100%; width: 0; background: linear-gradient(90deg, #ff6a3d, #ffc14a); }
+  #mission-next { margin-top: 7px; font: 700 15px/1.3 sans-serif; color: #ffe2c6; }
+  #mission-next b { color: #ffc14a; letter-spacing: 0.14em; font-size: 12px; }
+  #topbar { position: absolute; top: 14px; left: 50%; transform: translateX(-50%); display: flex; gap: 18px; align-items: center; padding: 8px 16px; }
+  #stars { color: #ffc14a; font: 800 28px/1 sans-serif; letter-spacing: 0.08em; }
+  #cash { font: 800 22px/1 sans-serif; color: #ffe08a; }
+  #clock { font: 700 15px/1.2 sans-serif; letter-spacing: 0.08em; }
+  #police { position: absolute; top: 14px; right: 14px; width: 292px; padding: 10px 12px 8px; }
+  #police-kicker { font: 800 12px/1 sans-serif; letter-spacing: 0.16em; color: #9fd0ff; }
+  #units { margin-top: 6px; font: 700 15px/1.35 sans-serif; }
+  .unit { display: flex; justify-content: space-between; gap: 8px; }
+  .unit i { font-style: normal; color: #ffb089; }
+  #notice { position: absolute; top: 78px; left: 50%; transform: translateX(-50%); padding: 8px 14px; background: rgba(168,36,32,0.92); font: 800 15px/1 sans-serif; letter-spacing: 0.12em; }
+  #vitals { position: absolute; left: 14px; bottom: 14px; width: 340px; }
+  .lbl { font: 800 11px/1 sans-serif; letter-spacing: 0.14em; color: #ffd0c4; margin-top: 5px; }
+  .track { height: 12px; margin-top: 3px; background: #24181c; border: 1px solid rgba(255,255,255,0.25); }
+  .track b { display: block; height: 100%; width: 0; }
+  #hp b { background: #ff4d5a; }
+  #ar b { background: #49b6ff; }
+  #weapons { display: flex; gap: 6px; margin-top: 8px; }
+  .slot { flex: 1; min-width: 0; padding: 5px 6px; border: 2px solid rgba(255,255,255,0.25); background: rgba(8,10,14,0.78); }
+  .slot.on { border-color: #ffc14a; background: rgba(255,193,74,0.16); }
+  .slot span { display: block; font: 800 11px/1.2 sans-serif; letter-spacing: 0.04em; color: #ffd8b0; }
+  .slot b { font: 800 15px/1.15 sans-serif; }
+  #talk { position: absolute; left: 50%; bottom: 16px; width: 500px; transform: translateX(-50%); display: flex; gap: 10px; padding: 8px; align-items: center; }
+  #portrait { width: 74px; height: 74px; background: #222; border: 2px solid #ffc14a; }
+  #speaker { font: 800 12px/1 sans-serif; letter-spacing: 0.14em; color: #ffc14a; }
+  #line { font: 650 17px/1.3 sans-serif; margin-top: 4px; }
+  #cluster { position: absolute; right: 16px; bottom: 12px; width: 188px; text-align: center; }
+  #radio { margin-bottom: 6px; padding: 6px 8px; text-align: left; }
+  #radio-kicker { display: block; font: 800 10px/1 sans-serif; letter-spacing: 0.16em; color: #ff9ad5; }
+  #radio-station { display: block; font: 800 14px/1.2 sans-serif; }
+  #radio-track { display: block; font: 600 12px/1.25 sans-serif; color: #ffe2f2; }
+  #map-wrap { width: 172px; height: 172px; margin: 0 auto; border-radius: 50%; border: 3px solid #ffe7c8; position: relative; overflow: hidden; box-shadow: 0 0 0 5px rgba(8,10,14,0.55); }
+  #minimap { width: 172px; height: 172px; display: block; background: #14343a; }
+  #north { position: absolute; top: 5px; left: 0; right: 0; text-align: center; font: 800 13px/1 sans-serif; text-shadow: 0 1px 2px #000; }
+  #district { margin-top: 4px; font: 800 13px/1.2 sans-serif; letter-spacing: 0.12em; text-shadow: 0 1px 2px #000; }
+  #speed { font: 800 28px/1 sans-serif; text-shadow: 0 1px 2px #000; }
+  #speed small { font-size: 11px; letter-spacing: 0.08em; }
+  #veh-name { font: 800 12px/1.2 sans-serif; letter-spacing: 0.08em; text-shadow: 0 1px 2px #000; }
+  #cond-label { margin-top: 2px; font: 800 10px/1 sans-serif; letter-spacing: 0.14em; color: #d7ffe0; text-shadow: 0 1px 2px #000; }
+  #cond { height: 7px; width: 148px; margin: 3px auto 0; background: #2a2424; border: 1px solid rgba(255,255,255,0.3); }
+  #cond b { display: block; height: 100%; width: 0; background: #7dff6a; }
+  #crosshair { position: absolute; left: 50%; top: 46%; width: 18px; height: 18px; margin: -9px 0 0 -9px; border: 2px solid rgba(255,246,234,0.95); border-radius: 50%; }
+  #complete[hidden], #talk[hidden], #notice[hidden] { display: none; }
+  #complete { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(6,4,8,0.55); }
+  #complete .card { width: 440px; padding: 28px 22px; text-align: center; }
+  #complete h2 { margin: 0; font: 800 14px/1 sans-serif; letter-spacing: 0.2em; color: #ffc14a; }
+  #complete h3 { margin: 8px 0 0; font: 800 32px/1.1 sans-serif; }
+  #complete p { margin: 10px 0 0; font: 800 22px/1 sans-serif; color: #ffe08a; }
+  #menus { position: fixed; inset: 0; z-index: 6; pointer-events: none; color: #fff8ee; font-family: "Segoe UI", sans-serif; }
+  #boot, #pause, #sheet, #worldmap { pointer-events: auto; }
+  #boot[hidden], #pause[hidden], #sheet[hidden], #worldmap[hidden] { display: none !important; }
+  #boot { position: absolute; inset: 0; display: flex; align-items: center; background: linear-gradient(90deg, rgba(8,6,12,0.9) 0%, rgba(8,6,12,0.78) 380px, rgba(8,6,12,0.2) 640px, rgba(8,6,12,0) 100%); }
+  #boot .col { width: 460px; margin-left: 56px; }
+  #logo { font: 800 58px/0.9 sans-serif; letter-spacing: 0.03em; text-shadow: 0 8px 24px rgba(0,0,0,0.45); }
+  #logo i { display: block; margin-bottom: 8px; font-style: normal; font: 800 14px/1 sans-serif; letter-spacing: 0.38em; color: #ffb089; }
+  #tag { margin: 12px 0 18px; max-width: 420px; font: 600 17px/1.35 sans-serif; color: #ffe2c6; }
+  .mbtn { display: block; width: 100%; margin: 8px 0; padding: 12px 14px; text-align: left; font: 800 18px/1 sans-serif; letter-spacing: 0.12em; color: #fff8ee; background: rgba(10,12,18,0.72); border: 1px solid rgba(255,236,214,0.35); cursor: pointer; }
+  .mbtn:hover, .mbtn:focus { border-color: #ffc14a; background: rgba(255,193,74,0.16); }
+  .mbtn:disabled { opacity: 0.4; cursor: default; }
+  #slot { margin-top: 16px; padding: 12px 14px; }
+  #slot b { display: block; font: 800 12px/1 sans-serif; letter-spacing: 0.16em; color: #ffc14a; }
+  #slot p { margin: 5px 0 0; font: 700 16px/1.3 sans-serif; }
+  #pause, #sheet { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(6,4,8,0.5); }
+  #pause .card, #sheet .card { width: 440px; padding: 22px 22px 16px; }
+  #pause-kicker, #sheet-kicker { font: 800 13px/1 sans-serif; letter-spacing: 0.2em; color: #ffc14a; }
+  #pause h2 { margin: 6px 0 12px; font: 800 36px/1 sans-serif; }
+  #sheet-body { margin: 12px 0; font: 650 16px/1.45 sans-serif; }
+  #sheet-body label { display: flex; justify-content: space-between; gap: 12px; margin: 10px 0; font: 800 13px/1 sans-serif; letter-spacing: 0.12em; }
+  #sheet-body input { width: 220px; }
+  #worldmap { position: absolute; inset: 0; background: #102430; }
+  #worldmap canvas { width: 100%; height: 100%; display: block; }
 </style>
 </head>
 <body>
-<canvas id="view" aria-label="Port Solano, an open city. Click to look around, WASD to walk."></canvas>
+<canvas id="view" aria-label="Port Solano. Click to look, WASD to move, F to drive."></canvas>
 <div id="hud">
-  <div id="place">
-    <div id="city-name">PORT SOLANO</div>
-    <div id="district">Coral Shore</div>
+  <section id="mission" class="panel">
+    <div id="mission-kicker">JOB OFFER</div>
+    <div id="mission-title">MISSION 1/6 · CORAL DROP</div>
+    <div id="mission-text">Walk to the gold marker</div>
+    <div id="mission-bar"><i id="mission-fill"></i></div>
+    <div id="mission-next"><b>NEXT</b> Meet Mateo Sol on Coral Shore</div>
+  </section>
+  <div id="topbar" class="panel">
+    <div id="stars">☆☆☆☆☆</div>
+    <div id="cash">$480</div>
+    <div id="clock">DAY 2 · 18:42</div>
   </div>
-  <div id="heat">
-    <div id="stars">CLEAR</div>
-    <div id="vitals">HP 100  AR 40  $480</div>
-    <div id="arms">Fists</div>
-    <div id="units">NO UNITS</div>
+  <section id="police" class="panel">
+    <div id="police-kicker">POLICE RESPONSE</div>
+    <div id="units">NO UNITS IN RANGE</div>
+  </section>
+  <div id="notice" hidden>ROADBLOCK</div>
+  <section id="vitals">
+    <div class="lbl">HEALTH</div>
+    <div id="hp" class="track"><b></b></div>
+    <div class="lbl">ARMOUR</div>
+    <div id="ar" class="track"><b></b></div>
+    <div id="weapons"></div>
+  </section>
+  <section id="talk" class="panel" hidden>
+    <canvas id="portrait" width="128" height="128"></canvas>
+    <div>
+      <div id="speaker">NIA VOSS</div>
+      <div id="line"></div>
+    </div>
+  </section>
+  <div id="cluster">
+    <div id="radio" class="panel">
+      <span id="radio-kicker">NOW PLAYING</span>
+      <b id="radio-station">LAGOON FM</b>
+      <span id="radio-track">Glass Tide — Vela Wren</span>
+    </div>
+    <div id="map-wrap">
+      <canvas id="minimap" width="344" height="344"></canvas>
+      <div id="north">N</div>
+    </div>
+    <div id="district">CORAL SHORE</div>
+    <div id="speed">0<small> KM/H</small></div>
+    <div id="veh-name">ON FOOT</div>
+    <div id="cond-label">CONDITION</div>
+    <div id="cond"><b></b></div>
   </div>
   <div id="crosshair"></div>
+  <div id="complete" hidden>
+    <div class="card panel">
+      <h2>MISSION COMPLETE</h2>
+      <h3 id="done-title">THE TIDE JOB</h3>
+      <p id="done-cash">+$4,500</p>
+    </div>
+  </div>
 </div>
 <p id="status" role="status" aria-live="polite"></p>
+<div id="menus"></div>
 <script type="module" src="./src/main.js"></script>
 </body>
 </html>
