@@ -365,11 +365,11 @@ export function stagePolice(police, shot, x, z, yaw) {
       police.officers[i].active = false;
       police.officers[i].mesh.visible = false;
     }
-    police.hx = x + rx * 8.5;
-    police.hz = z - 12;
-    police.hy = 28;
+    police.hx = x + rx * 9.5;
+    police.hz = z - 14;
+    police.hy = 30;
     police.heli.mesh.visible = true;
-    police.heli.mesh.scale.setScalar(4.5);
+    police.heli.mesh.scale.setScalar(5.2);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
     police.heli.mesh.rotation.y = yaw + 0.85;
     police.heli.rotor.rotation.y = 0.7;

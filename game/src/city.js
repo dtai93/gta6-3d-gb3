@@ -97,7 +97,7 @@ export function createCity(scene, rng) {
 
   const asphalt = new THREE.Mesh(
     new THREE.PlaneGeometry(cityW + 36, cityD + 36),
-    new THREE.MeshLambertMaterial({ color: 0x424650 }),
+    new THREE.MeshLambertMaterial({ color: 0x46444d }),
   );
   asphalt.rotation.x = -Math.PI / 2;
   asphalt.position.set(cityW / 2, 0, cityD / 2);

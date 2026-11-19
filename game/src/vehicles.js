@@ -106,7 +106,8 @@ function buildCar(type) {
   addGlow(group, W * 0.32, bodyY * 0.9, tail + 0.08, 0xff2a30, 0.62);
   const wheels = [];
   const wz = L * 0.32;
-  const wx = W * 0.42;
+  // Keep the full tire tread inside the painted body envelope at every camera angle.
+  const wx = W * 0.34;
   const spots = [[-wx, -wz], [wx, -wz], [-wx, wz], [wx, wz]];
   for (let i = 0; i < spots.length; i++) {
     const pivot = new THREE.Group();

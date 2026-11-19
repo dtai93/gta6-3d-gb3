@@ -509,7 +509,7 @@ function placeCamera() {
     scene.fog.near = 280;
     scene.fog.far = 1600;
   }
-  if (shotName === 'start') exposure = 1.2;
+  if (shotName === 'start') exposure = 1.24;
   renderer.toneMappingExposure = exposure;
   frameFocus();
   updateChaseCamera(camera, rig, focus);

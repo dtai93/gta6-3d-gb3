@@ -149,6 +149,9 @@ function stageChase(world, shot) {
   const roadLight = new THREE.PointLight(0xffd89b, 30, 42, 1.2);
   roadLight.position.set(shot.x - 4, 7, shot.z - 18);
   world.scene.add(roadLight);
+  const spotlightWash = new THREE.PointLight(0xdaf5ff, 18, 34, 1.4);
+  spotlightWash.position.set(shot.x + 8.5, 16, shot.z - 14);
+  world.scene.add(spotlightWash);
   combat.vitals.health = 84;
   combat.vitals.armour = 46;
   combat.vitals.cash = 2460;

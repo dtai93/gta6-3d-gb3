@@ -91,10 +91,24 @@ Driveable traffic. `vehicles.js` builds five cars (Solano Sprint, Harbor Cab, Do
 Wheels sit inside the body. The helicopter rotor is a cross so it reads against the sky. `shots.json` is `1-chase.jpg`, `2-onfoot.jpg`, `3-city.jpg`, `4-start.jpg`. All four JPEGs are 1280×800 and under 256 KiB. Cover shows the causeway chase, the searchlight, and the full HUD.
 
 ## Next
-
 1. If the left cruiser still clips the cover edge, nudge `stagePolice` chase unit 0 a little toward the lane.
 2. Keep each source file one job. The judge only sees file names and the first declarations.
 3. Cover stays `1-chase.jpg`. Do not put the menu on the chase shot.
+
+## Visual polish — final pass
+
+Re-authored the shipped polish in this session. The Solano Sprint keeps tapered painted bodywork,
+wheels are inset beneath the fenders, KESTREL-1 is larger in the chase sky with rotor, fuselage,
+tail, beacon and spotlight details, and police roles remain readable as compact CHASE/RAMMING/
+ROADBLOCK/SPOTLIGHT chips.
+
+The 768×480 cover downscale was checked locally. HUD panels, mission copy, wanted chips, speed
+and minimap remain legible. A responsive HUD rule tightens the panels for short windows without
+moving or hiding the cover art. The title flyover is framed closer and lower over the late-golden
+Port Solano grid; it is not a blank or murky starter screen.
+
+All named screenshots were recaptured at 1280×800 and exported as JPEG:
+`1-chase.jpg`, `2-onfoot.jpg`, `3-city.jpg`, `4-start.jpg`.
 
 ## Session 7 — colour and the causeway
 

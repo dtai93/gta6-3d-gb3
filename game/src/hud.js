@@ -161,6 +161,9 @@ export function updateHud(hud, s) {
     for (let i = 0; i < 5; i++) stars += i < s.stars ? '★' : '☆';
   }
   hud.stars.textContent = stars;
+  hud.stars.style.textShadow = s.stars > 0
+    ? '0 2px 5px rgba(24,10,16,0.85), 0 0 10px rgba(255,193,74,0.28)'
+    : '0 1px 3px rgba(0,0,0,0.8)';
   hud.insight.hidden = !(s.inSight && s.stars > 0 && s.down !== 'wasted' && s.down !== 'busted');
   hud.cash.textContent = money(s.cash);
   if (s.cashPop > 0) {
