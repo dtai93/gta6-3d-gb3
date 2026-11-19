@@ -139,3 +139,9 @@ Looked at the four frames. Cover stays the causeway chase: four stars, three cru
 ## Next
 
 Submit from the kit once the recording is sealed. Do not replace `1-chase.jpg`. Keep `vendor/makefun-game.ts` and `LICENSE` untouched.
+
+## Visual polish pass
+
+The chase camera now sits closer behind the Solano Sprint and uses a warmer sunset palette. The chase art adds tyre smoke, skid marks, cones and concrete roadblock pieces, glossy sport paint, and stronger warm roadside and road lighting. KESTREL-1 was enlarged in the helicopter mesh and a clearly readable staged upper-third chase silhouette with rotors, fuselage, tail, nav lights and spotlight beam was added for the cover contact sheet. Police response roles are restyled as compact colored pursuit, ramming, roadblock and spotlight chips.
+
+All four screenshots were recaptured at 1280×800: the on-foot scene retains the crosshair, officers and tracers, the city shot has traffic and the coastal flyover view, and the start shot uses the late-golden flyover instead of the older night view.

@@ -100,6 +100,24 @@ function driftFx(scene, x, z, yaw) {
       scene.add(mesh);
     }
   }
+  const blockMat = new THREE.MeshLambertMaterial({ color: 0xd4c5ab });
+  const blockGeo = new THREE.BoxGeometry(3.4, 0.55, 0.8);
+  for (let i = -1; i <= 1; i++) {
+    const mesh = new THREE.Mesh(blockGeo, blockMat);
+    const dist = 7.4 + i * 0.15;
+    mesh.position.set(x - nx * dist + rx * i * 2.25, 0.32, z - nz * dist + rz * i * 2.25);
+    mesh.rotation.y = yaw + (i === 0 ? 0 : i * 0.12);
+    mesh.castShadow = true;
+    scene.add(mesh);
+  }
+  for (let i = -2; i <= 2; i++) {
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.24, 0.85, 7),
+      new THREE.MeshLambertMaterial({ color: i % 2 ? 0xff7a24 : 0xffcc55 }),
+    );
+    cone.position.set(x - nx * 8.8 + rx * i * 1.15, 0.42, z - nz * 8.8 + rz * i * 1.15);
+    scene.add(cone);
+  }
 }
 
 function stageChase(world, shot) {
@@ -119,6 +137,12 @@ function stageChase(world, shot) {
   world.police.officers[0].active = false;
   world.police.officers[0].mesh.visible = false;
   driftFx(world.scene, shot.x, shot.z, shot.face);
+  const facadeLight = new THREE.PointLight(0xffbd78, 38, 38, 1.35);
+  facadeLight.position.set(shot.x + 10, 12, shot.z - 8);
+  world.scene.add(facadeLight);
+  const roadLight = new THREE.PointLight(0xffd89b, 30, 42, 1.2);
+  roadLight.position.set(shot.x - 4, 7, shot.z - 18);
+  world.scene.add(roadLight);
   combat.vitals.health = 84;
   combat.vitals.armour = 46;
   combat.vitals.cash = 2460;

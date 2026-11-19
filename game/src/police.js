@@ -42,15 +42,15 @@ function officerMesh() {
 
 function helicopterMesh() {
   const mesh = new THREE.Group();
-  const bodyMat = new THREE.MeshLambertMaterial({ color: 0x1b2430 });
+  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x26394e, shininess: 72, specular: 0x9cb4c9 });
   const glassMat = new THREE.MeshLambertMaterial({ color: 0xb7d4e2 });
-  const body = new THREE.Mesh(new THREE.BoxGeometry(1.55, 0.72, 3.3), bodyMat);
-  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.28, 0.28, 2.3), bodyMat);
+  const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.92, 4.1), bodyMat);
+  const tail = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.36, 2.9), bodyMat);
   tail.position.set(0, 0.2, 2.4);
-  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.7, 0.46), bodyMat);
+  const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.92, 0.58), bodyMat);
   fin.position.set(0, 0.55, 3.3);
-  const rotor = new THREE.Mesh(new THREE.BoxGeometry(7.2, 0.08, 0.46), BLACK);
-  rotor.add(new THREE.Mesh(new THREE.BoxGeometry(0.46, 0.08, 7.2), BLACK));
+  const rotor = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.11, 0.52), BLACK);
+  rotor.add(new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.11, 9.2), BLACK));
   rotor.position.y = 0.55;
   const tailRotor = new THREE.Mesh(new THREE.BoxGeometry(0.08, 0.95, 0.12), BLACK);
   tailRotor.position.set(0.22, 0.55, 3.3);
@@ -365,11 +365,11 @@ export function stagePolice(police, shot, x, z, yaw) {
       police.officers[i].active = false;
       police.officers[i].mesh.visible = false;
     }
-    police.hx = x + _fwd.x * 17 + rx * 3.2;
-    police.hz = z + _fwd.z * 17 + rz * 3.2;
-    police.hy = 8.05;
+    police.hx = x + rx * 8.5;
+    police.hz = z - 12;
+    police.hy = 28;
     police.heli.mesh.visible = true;
-    police.heli.mesh.scale.setScalar(1.7);
+    police.heli.mesh.scale.setScalar(4.5);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
     police.heli.mesh.rotation.y = yaw + 0.85;
     police.heli.rotor.rotation.y = 0.7;

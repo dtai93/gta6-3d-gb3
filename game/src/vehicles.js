@@ -71,7 +71,11 @@ export function yawFromDir(dx, dz) {
 
 function buildCar(type) {
   const group = new THREE.Group();
-  const bodyMat = new THREE.MeshLambertMaterial({ color: type.color });
+  const bodyMat = new THREE.MeshPhongMaterial({
+    color: type.color,
+    shininess: type.extra === 'sport' || type.extra === 'muscle' ? 82 : 48,
+    specular: type.extra === 'sport' || type.extra === 'muscle' ? 0x9fcfff : 0x5a6672,
+  });
   const headMat = new THREE.MeshBasicMaterial({ color: 0xfff1c9 });
   const L = type.length;
   const W = type.width;

@@ -4,9 +4,9 @@
 import * as THREE from '../vendor/three.module.min.js';
 import { addGlow } from './glow.js';
 
-const HORIZON = new THREE.Color(0xffc15a);
-const MID = new THREE.Color(0xe24b92);
-const ZENITH = new THREE.Color(0x2a1468);
+const HORIZON = new THREE.Color(0xffd27a);
+const MID = new THREE.Color(0xf06496);
+const ZENITH = new THREE.Color(0x351a78);
 const GROUND = new THREE.Color(0x4e2a58);
 const SUN_COLOR = new THREE.Color(0xffd7a0);
 

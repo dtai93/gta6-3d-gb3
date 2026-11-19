@@ -28,7 +28,7 @@
   #police-kicker { font: 800 12px/1 sans-serif; letter-spacing: 0.16em; color: #9fd0ff; }
   #units { margin-top: 6px; font: 700 15px/1.35 sans-serif; }
   .unit { display: flex; justify-content: space-between; gap: 8px; }
-  .unit i { font-style: normal; color: #ffb089; }
+  .unit i { font-style: normal; color: #ffb089; padding: 2px 5px; background: rgba(255,90,60,0.22); border: 1px solid rgba(255,176,137,0.38); }
   #notice { position: absolute; top: 78px; left: 50%; transform: translateX(-50%); padding: 8px 14px; background: rgba(168,36,32,0.92); font: 800 15px/1 sans-serif; letter-spacing: 0.12em; }
   #vitals { position: absolute; left: 14px; bottom: 14px; width: 340px; }
   .lbl { font: 800 11px/1 sans-serif; letter-spacing: 0.14em; color: #ffd0c4; margin-top: 5px; }
@@ -61,6 +61,18 @@
   #cond { height: 10px; width: 160px; margin: 3px auto 0; background: #2a2424; border: 1px solid rgba(255,255,255,0.45); }
   #cond b { display: block; height: 100%; width: 0; background: #7dff6a; }
   #crosshair { position: absolute; left: 50%; top: 44%; width: 6px; height: 6px; margin: -3px 0 0 -3px; background: #fff; border-radius: 50%; box-shadow: 0 0 0 1px #111, 10px 0 0 -1px #fff, 16px 0 0 -1px #fff, 22px 0 0 -1px #fff, -10px 0 0 -1px #fff, -16px 0 0 -1px #fff, -22px 0 0 -1px #fff, 0 10px 0 -1px #fff, 0 16px 0 -1px #fff, 0 22px 0 -1px #fff, 0 -10px 0 -1px #fff, 0 -16px 0 -1px #fff, 0 -22px 0 -1px #fff; }
+  #chase-air { position: absolute; display: none; left: 58%; top: 76px; width: 260px; height: 150px; z-index: 3; filter: drop-shadow(0 10px 12px rgba(18,8,28,0.32)); }
+  #chase-air.show { display: block; }
+  #chase-air .rotor { position: absolute; left: 18px; top: 17px; width: 225px; height: 9px; border-radius: 50%; background: rgba(22,26,36,0.92); transform: rotate(-3deg); box-shadow: 0 2px 0 #9eb2c8; }
+  #chase-air .rotor::before { content: ""; position: absolute; left: 108px; top: -1px; width: 9px; height: 9px; border-radius: 50%; background: #cbd9e4; }
+  #chase-air .body { position: absolute; left: 82px; top: 40px; width: 112px; height: 58px; border-radius: 48% 38% 42% 44%; background: linear-gradient(145deg,#52677a,#17253a 68%,#0b1018); border: 2px solid #9db4c5; }
+  #chase-air .glass { position: absolute; left: 89px; top: 48px; width: 42px; height: 28px; clip-path: polygon(0 0,100% 14%,82% 100%,0 85%); background: linear-gradient(135deg,#d8eff7,#76aabd); border: 1px solid #dcecf2; }
+  #chase-air .tail { position: absolute; left: 20px; top: 54px; width: 76px; height: 18px; background: #202e40; border: 2px solid #7f94a5; transform: skewX(-18deg); }
+  #chase-air .fin { position: absolute; left: 22px; top: 26px; width: 22px; height: 42px; background: #202e40; clip-path: polygon(40% 0,100% 35%,100% 100%,0 100%,0 72%); border: 1px solid #7f94a5; }
+  #chase-air .lamp-l { position: absolute; left: 90px; top: 86px; width: 13px; height: 13px; border-radius: 50%; background: #ff3444; box-shadow: 0 0 16px #ff3444; }
+  #chase-air .lamp-r { position: absolute; left: 175px; top: 83px; width: 13px; height: 13px; border-radius: 50%; background: #5aaaff; box-shadow: 0 0 16px #5aaaff; }
+  #chase-air .beam { position: absolute; left: 125px; top: 91px; width: 170px; height: 68px; transform: rotate(62deg); transform-origin: 0 0; clip-path: polygon(0 38%,100% 0,100% 100%,0 62%); background: linear-gradient(90deg,rgba(255,246,205,0.82),rgba(255,246,205,0.08)); }
+  #chase-air .name { position: absolute; left: 78px; top: 105px; color: #fff7dd; font: 800 10px/1 sans-serif; letter-spacing: 0.16em; text-shadow: 0 2px 4px #000; }
   #wheel { position: absolute; left: 16px; top: 198px; width: 176px; height: 176px; border-radius: 50%; border: 3px solid #ffe7c8; background: rgba(8,10,16,0.78); box-shadow: 0 0 0 5px rgba(8,10,14,0.5); }
   #wheel .hub { position: absolute; left: 46px; top: 74px; width: 84px; text-align: center; font: 800 11px/1.2 sans-serif; letter-spacing: 0.14em; color: #ffc14a; }
   #wheel .wseg { position: absolute; width: 86px; font: 800 12px/1.15 sans-serif; color: #ffe2c6; }
@@ -105,6 +117,11 @@
 <body>
 <canvas id="view" aria-label="Port Solano. Click to look, WASD to move, F to drive."></canvas>
 <div id="hud">
+  <div id="chase-air" aria-hidden="true">
+    <div class="beam"></div><div class="tail"></div><div class="fin"></div><div class="rotor"></div>
+    <div class="body"></div><div class="glass"></div><div class="lamp-l"></div><div class="lamp-r"></div>
+    <div class="name">KESTREL-1</div>
+  </div>
   <section id="mission" class="panel">
     <div id="mission-kicker">JOB OFFER</div>
     <div id="mission-title">MISSION 1/6 · CORAL DROP</div>
