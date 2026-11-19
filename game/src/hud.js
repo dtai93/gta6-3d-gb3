@@ -175,8 +175,9 @@ export function updateHud(hud, s) {
     const n = Math.min(4, rows.length);
     for (let i = 0; i < n; i++) {
       const r = rows[i];
-      const role = r.role === 'chase' ? 'PURSUIT' : r.role === 'ram' ? 'RAMMING' : r.role === 'roadblock' ? 'ROADBLOCK' : r.role === 'air' ? 'SPOTLIGHT' : r.role;
-      html += '<div class="unit"><span>' + r.callsign + '</span><i>' + role + '</i><span>' + Math.round(r.dist) + 'm</span></div>';
+      const role = r.role === 'chase' ? 'CHASE' : r.role === 'ram' ? 'RAMMING' : r.role === 'roadblock' ? 'ROADBLOCK' : r.role === 'air' ? 'SPOTLIGHT' : r.role;
+      const chip = role === 'CHASE' ? 'chase' : role === 'RAMMING' ? 'ram' : role === 'ROADBLOCK' ? 'block' : role === 'SPOTLIGHT' ? 'air' : 'other';
+      html += '<div class="unit"><span>' + r.callsign + '</span><i class="role-' + chip + '">' + role + '</i><span>' + Math.round(r.dist) + 'm</span></div>';
     }
     hud.units.innerHTML = html;
   }

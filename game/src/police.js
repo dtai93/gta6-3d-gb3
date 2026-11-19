@@ -352,7 +352,7 @@ export function stagePolice(police, shot, x, z, yaw) {
     const cops = [
       { s: -4.3, b: 0.35, turn: 0.12, role: 'chase', t: 0.02 },
       { s: 4.4, b: 0.7, turn: -0.1, role: 'ram', t: 0.16 },
-      { s: -5.1, b: -7.4, turn: 0.08, role: 'chase', t: 0.28 },
+      { s: -5.1, b: -7.4, turn: 0.08, role: 'roadblock', t: 0.28 },
     ];
     for (let i = 0; i < cops.length; i++) {
       const c = cops[i];

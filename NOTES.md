@@ -145,3 +145,7 @@ Submit from the kit once the recording is sealed. Do not replace `1-chase.jpg`. 
 The chase camera now sits closer behind the Solano Sprint and uses a warmer sunset palette. The chase art adds tyre smoke, skid marks, cones and concrete roadblock pieces, glossy sport paint, and stronger warm roadside and road lighting. KESTREL-1 was enlarged in the helicopter mesh and a clearly readable staged upper-third chase silhouette with rotors, fuselage, tail, nav lights and spotlight beam was added for the cover contact sheet. Police response roles are restyled as compact colored pursuit, ramming, roadblock and spotlight chips.
 
 All four screenshots were recaptured at 1280×800: the on-foot scene retains the crosshair, officers and tracers, the city shot has traffic and the coastal flyover view, and the start shot uses the late-golden flyover instead of the older night view.
+
+## Contact-sheet polish
+
+The staged roadblock and cones now sit ahead of the Sprint, and two pedestrians occupy the sidewalks in the chase frame. Car bodies use a low-poly tapered profile with a raised roof, wheels pulled inside the body, and cleaner cabin proportions. Asphalt is a lighter warm charcoal. The chase HUD gives wanted stars, cash and speed more weight, with distinct CHASE, RAMMING, ROADBLOCK and SPOTLIGHT chips; KESTREL-1 is larger and its rotor, cabin and beacon colours stand out without crossing the top-row panels. The start flyover is lower and closer to the road grid.

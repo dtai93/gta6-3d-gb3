@@ -56,11 +56,15 @@ function placePed(ped, x, z, yaw) {
   ped.mesh.rotation.y = yaw;
 }
 
-function driftFx(scene, x, z, yaw) {
+function driftFx(scene, x, z, yaw, roadYaw) {
   const nx = -Math.sin(yaw);
   const nz = -Math.cos(yaw);
   const rx = Math.cos(yaw);
   const rz = -Math.sin(yaw);
+  const roadX = -Math.sin(roadYaw);
+  const roadZ = -Math.cos(roadYaw);
+  const sideX = Math.cos(roadYaw);
+  const sideZ = -Math.sin(roadYaw);
   const smokeGeo = new THREE.SphereGeometry(0.34, 6, 5);
   const puff = [
     [0.72, 2.35, 0.28, 0.55, 0.4],
@@ -104,9 +108,9 @@ function driftFx(scene, x, z, yaw) {
   const blockGeo = new THREE.BoxGeometry(3.4, 0.55, 0.8);
   for (let i = -1; i <= 1; i++) {
     const mesh = new THREE.Mesh(blockGeo, blockMat);
-    const dist = 7.4 + i * 0.15;
-    mesh.position.set(x - nx * dist + rx * i * 2.25, 0.32, z - nz * dist + rz * i * 2.25);
-    mesh.rotation.y = yaw + (i === 0 ? 0 : i * 0.12);
+    const dist = 13.5 + i * 0.15;
+    mesh.position.set(x + roadX * dist + sideX * i * 2.25, 0.32, z + roadZ * dist + sideZ * i * 2.25);
+    mesh.rotation.y = roadYaw + (i === 0 ? 0 : i * 0.12);
     mesh.castShadow = true;
     scene.add(mesh);
   }
@@ -115,13 +119,13 @@ function driftFx(scene, x, z, yaw) {
       new THREE.ConeGeometry(0.24, 0.85, 7),
       new THREE.MeshLambertMaterial({ color: i % 2 ? 0xff7a24 : 0xffcc55 }),
     );
-    cone.position.set(x - nx * 8.8 + rx * i * 1.15, 0.42, z - nz * 8.8 + rz * i * 1.15);
+    cone.position.set(x + roadX * 15.5 + sideX * i * 1.15, 0.42, z + roadZ * 15.5 + sideZ * i * 1.15);
     scene.add(cone);
   }
 }
 
 function stageChase(world, shot) {
-  const { combat, wanted, missions, dialogue, toast, radio } = world;
+  const { combat, wanted, missions, dialogue, toast, radio, peds } = world;
   setWantedStars(wanted, 4, shot.x, shot.z);
   wanted.seen = true;
   const ride = drive(world, 0, shot, 32, 0.48);
@@ -136,7 +140,9 @@ function stageChase(world, shot) {
   stagePolice(world.police, 'chase', shot.x, shot.z, shot.yaw);
   world.police.officers[0].active = false;
   world.police.officers[0].mesh.visible = false;
-  driftFx(world.scene, shot.x, shot.z, shot.face);
+  driftFx(world.scene, shot.x, shot.z, shot.face, shot.yaw);
+  placePed(peds.list[0], shot.x - 7.2, shot.z - 13, shot.face + 1.5);
+  placePed(peds.list[1], shot.x + 7.4, shot.z - 17, shot.face - 1.5);
   const facadeLight = new THREE.PointLight(0xffbd78, 38, 38, 1.35);
   facadeLight.position.set(shot.x + 10, 12, shot.z - 8);
   world.scene.add(facadeLight);
@@ -150,8 +156,8 @@ function stageChase(world, shot) {
   combat.loadout.index = 1;
   stageMission(missions, 'chase');
   sayLine(dialogue, 'nia', "They're on the causeway. Don't stop for the lights.", 999);
-  toast.text = 'ROADBLOCK ON THE CAUSEWAY';
-  toast.t = 999;
+  toast.text = '';
+  toast.t = 0;
   radio.index = 0;
   return ride;
 }

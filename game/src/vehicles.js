@@ -16,6 +16,8 @@ export const CAR_TYPES = [
 const BOX = new THREE.BoxGeometry(1, 1, 1);
 const WHEEL_GEO = new THREE.CylinderGeometry(0.33, 0.33, 0.22, 8);
 WHEEL_GEO.rotateZ(Math.PI / 2);
+const BODY_GEO = new THREE.CylinderGeometry(0.9, 1, 1, 12, 1);
+const CABIN_GEO = new THREE.CylinderGeometry(0.72, 1, 1, 8, 1);
 const HEAD_GEO = new THREE.SphereGeometry(0.12, 6, 5);
 const GLASS = new THREE.MeshLambertMaterial({ color: 0x8ec4dc });
 const RUBBER = new THREE.MeshLambertMaterial({ color: 0x1a1c20 });
@@ -81,11 +83,17 @@ function buildCar(type) {
   const W = type.width;
   const H = type.height;
   const bodyY = 0.55 + H / 2;
-  const body = box(bodyMat, 0, bodyY, 0, W * 0.92, H, L);
+  const body = new THREE.Mesh(BODY_GEO, bodyMat);
+  body.position.y = bodyY;
+  body.scale.set(W * 0.46, H, L * 0.49);
   body.castShadow = true;
   group.add(body);
   const cabinY = 0.55 + H + type.cabinH / 2 - 0.06;
-  group.add(box(GLASS, 0, cabinY, type.cabinZ, W * 0.84, type.cabinH, type.cabinL));
+  const cabin = new THREE.Mesh(CABIN_GEO, GLASS);
+  cabin.position.set(0, cabinY, type.cabinZ);
+  cabin.scale.set(W * 0.4, type.cabinH, type.cabinL * 0.5);
+  group.add(cabin);
+  group.add(box(bodyMat, 0, cabinY + type.cabinH * 0.43, type.cabinZ, W * 0.58, 0.1, type.cabinL * 0.68));
   const nose = -L / 2;
   const tail = L / 2;
   group.add(box(headMat, -W * 0.32, bodyY * 0.92, nose - 0.02, 0.28, 0.14, 0.06));
@@ -98,7 +106,7 @@ function buildCar(type) {
   addGlow(group, W * 0.32, bodyY * 0.9, tail + 0.08, 0xff2a30, 0.62);
   const wheels = [];
   const wz = L * 0.32;
-  const wx = W * 0.36;
+  const wx = W * 0.42;
   const spots = [[-wx, -wz], [wx, -wz], [-wx, wz], [wx, wz]];
   for (let i = 0; i < spots.length; i++) {
     const pivot = new THREE.Group();

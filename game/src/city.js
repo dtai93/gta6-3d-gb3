@@ -8,7 +8,7 @@ import { dressAvenue } from './avenue.js';
 const PALETTE = {
   'Coral Shore': [0xffe4c4, 0xfff8ef, 0xf0a088, 0xf7cbb4],
   'Old Harbor': [0xd2b498, 0xa88870, 0xe4d2bc, 0x7f8e9a],
-  'Neon Strip': [0x1a2236, 0x2c2448, 0x141a28, 0x101620],
+  'Neon Strip': [0x554650, 0x614d65, 0x3f4358, 0x4a3e48],
   'Palm Heights': [0xffe6c2, 0xf4efe4, 0xe4d0a8, 0xd5e4d8],
   'Industrial Docks': [0x9aa2aa, 0x727a82, 0xb4bac0, 0x5c656e],
 };
@@ -97,7 +97,7 @@ export function createCity(scene, rng) {
 
   const asphalt = new THREE.Mesh(
     new THREE.PlaneGeometry(cityW + 36, cityD + 36),
-    new THREE.MeshLambertMaterial({ color: 0x2a313c }),
+    new THREE.MeshLambertMaterial({ color: 0x424650 }),
   );
   asphalt.rotation.x = -Math.PI / 2;
   asphalt.position.set(cityW / 2, 0, cityD / 2);

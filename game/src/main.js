@@ -230,7 +230,7 @@ function shotPreview() {
   return {
     v: 1, x: SAFEHOUSE.x, z: SAFEHOUSE.z, yaw: 0.2,
     health: 84, armour: 40, cash: 2460, stars: 0,
-    day: 2, clock: 21 * 3600 + 18 * 60, radio: 2,
+    day: 2, clock: 18 * 3600 + 42 * 60, radio: 2,
     place: 'SAFEHOUSE', district: 'Coral Shore',
     missionTitle: 'MISSION 3/6 · THE TIDE JOB',
     played: 2 * 3600 + 14 * 60,
@@ -509,7 +509,7 @@ function placeCamera() {
     scene.fog.near = 280;
     scene.fog.far = 1600;
   }
-  if (shotName === 'start') exposure = 1.08;
+  if (shotName === 'start') exposure = 1.2;
   renderer.toneMappingExposure = exposure;
   frameFocus();
   updateChaseCamera(camera, rig, focus);
