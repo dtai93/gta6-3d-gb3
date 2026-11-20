@@ -137,10 +137,11 @@ function applyPalette(sky, pal) {
   sky.hemi.intensity = pal.hemiI;
 }
 
-export function updateSkyHour(sky, hour) {
+export function updateSkyHour(sky, hour, ferryWindow = false) {
   const h = ((hour % 24) + 24) % 24;
   if (h >= 17 && h < 19.5) {
     applyPalette(sky, SET);
+    if (ferryWindow) sky.hemi.intensity += 0.04;
     sky.sunOffset.set(52, 40, -58);
     sky.glare.material.opacity = 0.9;
     sky.halo.material.opacity = 0.36;
@@ -153,6 +154,7 @@ export function updateSkyHour(sky, hour) {
   else if (h >= 16 && h < 17) pal = mixPal(DAY, SET, h - 16);
   else pal = DAY;
   applyPalette(sky, pal);
+  if (ferryWindow) sky.hemi.intensity += 0.04;
   const night = h >= 20 || h < 5.5;
   sky.sunOffset.set(night ? -48 : 52, night ? 14 : 40, night ? -28 : -58);
   sky.glare.material.opacity = night ? 0.04 : 0.4;

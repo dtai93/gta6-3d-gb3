@@ -163,3 +163,23 @@ All four screenshots were recaptured at 1280×800: the on-foot scene retains the
 ## Contact-sheet polish
 
 The staged roadblock and cones now sit ahead of the Sprint, and two pedestrians occupy the sidewalks in the chase frame. Car bodies use a low-poly tapered profile with a raised roof, wheels pulled inside the body, and cleaner cabin proportions. Asphalt is a lighter warm charcoal. The chase HUD gives wanted stars, cash and speed more weight, with distinct CHASE, RAMMING, ROADBLOCK and SPOTLIGHT chips; KESTREL-1 is larger and its rotor, cabin and beacon colours stand out without crossing the top-row panels. The start flyover is lower and closer to the road grid.
+
+## Session 11 — waterfront depth systems
+
+`respect.js` tracks RP through Pier Hand, Tide Runner, Harbor Fixer, Breakwater Broker, and Port Keeper. Story jobs and the Solano Sprint award RP; the HUD shows the current title and points.
+
+`crew.js` gives Nia Voss, Mateo Sol, and Jun Park cooldown favors: reduce wanted heat, restore health or vehicle condition, and add a short speed boost (or armour on foot). Their original portraits, ability descriptions, and cooldown chips stay on the chase/on-foot HUD; C calls the next ready favor.
+
+`races.js` registers the Solano Sprint cargo route from Old Harbor through Ferry Cut, Crane Gate, Dock Nine, Palm Bend, Causeway Turn, and Shore Line. X starts it in a car at the line. The HUD shows place, checkpoint, next landmark, and elapsed time; a finish adds cash, RP, a race result, and an autosave. `?shot=race&seed=1` stages checkpoint three for a future capture; it is marked `capture: false` in `shots.json` and adds no screenshot.
+
+`garage.js` adds the Industrial Docks Dock Works stall (G nearby): lagoon respray, stamped SOLANO plates, a Tide tune, and repairs. Vehicle appearance, plate, tune cap, condition, and price are handled by `vehicles.js`.
+
+`activities.js` registers the safehouse, race, garage, and story contact, records cars taken, heat escapes, distance, jobs, wins, and best race time, and provides a ferry-arrival window. Activity icons are on the minimap and world map; the ferry chip also gives a small harbor-watch lighting lift.
+
+`mapscreen.js` is now MAP + STATS: five named districts and safehouse/contact/race/garage/job icons beside the story checklist, career totals, crew roster, respect rank, next job, and all three save-slot summaries. `save.js` keeps three local slots and migrates the former single slot as slot one. The title menu selects slots; pause opens the dense map. The garage panel is in `menus.js`.
+
+`police.js` names response tactics as CHASE, RAMMING, ROADBLOCK, and SPOTLIGHT for the HUD. `shots.js` stages credible RP and crew cooldowns in the existing chase/on-foot poses. City signage now labels the cargo run and dock service; `config.js` owns the activity coordinates. Six story jobs remain unchanged to preserve their staging.
+
+No screenshots were recaptured or replaced in this step. `game/index.html` adds the respect/ferry chips, crew panel, race panel, three-slot card, and service-shop styling. README features and controls were updated; the three make.fun badges and footer remain unchanged.
+
+Validation on port 18804: `?test=1&seed=1` reports `drive-test ok` with no page exceptions. The staged race scene shows checkpoint 3/6 and all three crew rows. Opening M renders the map, all five activity/job markers, story and career sections, crew, respect, and three save slots without exceptions. Browser checks exercised respray, plates, tune, repairs, race finish, rank-up, and three independent save slots. `MAKEFUN_OUTPUT_DIR=/tmp/g6aout node main.ts` writes `dossier.json`, copies `game/`, and retains exactly four JPEGs.

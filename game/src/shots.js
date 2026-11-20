@@ -5,6 +5,7 @@ import { SHOTS } from './config.js';
 import { setWantedStars } from './wanted.js';
 import { stagePolice } from './police.js';
 import { stageMission } from './missions.js';
+import { stageRace } from './races.js';
 import { say as sayLine } from './dialogue.js';
 import { addGlow } from './glow.js';
 import { createVehicle, seatPlayer, syncVehicle, yawFromDir } from './vehicles.js';
@@ -125,7 +126,7 @@ function driftFx(scene, x, z, yaw, roadYaw) {
 }
 
 function stageChase(world, shot) {
-  const { combat, wanted, missions, dialogue, toast, radio, peds } = world;
+  const { combat, wanted, missions, dialogue, toast, radio, peds, respect, crew } = world;
   setWantedStars(wanted, 4, shot.x, shot.z);
   wanted.seen = true;
   const ride = drive(world, 0, shot, 32, 0.48);
@@ -162,6 +163,11 @@ function stageChase(world, shot) {
   toast.text = '';
   toast.t = 0;
   radio.index = 0;
+  respect.rp = 910;
+  crew.selected = 0;
+  crew.cooldowns[0] = 0;
+  crew.cooldowns[1] = 16;
+  crew.cooldowns[2] = 0;
   return ride;
 }
 
@@ -249,7 +255,7 @@ function park(world, typeId, x, z, yaw) {
 }
 
 function stageOnFoot(world, shot) {
-  const { player, combat, wanted, missions, dialogue, radio, peds, toast } = world;
+  const { player, combat, wanted, missions, dialogue, radio, peds, toast, respect, crew } = world;
   setWantedStars(wanted, 4, shot.x, shot.z);
   wanted.seen = true;
   stand(player, combat, 2);
@@ -268,6 +274,11 @@ function stageOnFoot(world, shot) {
   toast.text = 'SHOTS FIRED ON THE STRIP';
   toast.t = 999;
   radio.index = 2;
+  respect.rp = 1540;
+  crew.selected = 2;
+  crew.cooldowns[0] = 0;
+  crew.cooldowns[1] = 0;
+  crew.cooldowns[2] = 21;
   placePed(peds.list[0], shot.x - 5.4, shot.z + 1.6, shot.face + 1.7);
   placePed(peds.list[1], shot.x + 5.6, shot.z - 0.8, shot.face - 0.5);
   return null;
@@ -301,6 +312,23 @@ function stageCity(world, shot) {
   return ride;
 }
 
+function stageDocklineRace(world, shot) {
+  const { combat, radio, respect, crew, race } = world;
+  const ride = drive(world, 0, shot, 26, 0.8);
+  ride.steer = 0.12;
+  stageRace(race);
+  combat.vitals.cash = 3180;
+  combat.vitals.health = 100;
+  combat.vitals.armour = 40;
+  respect.rp = 910;
+  crew.selected = 0;
+  crew.cooldowns[0] = 0;
+  crew.cooldowns[1] = 12;
+  crew.cooldowns[2] = 0;
+  radio.index = 4;
+  return ride;
+}
+
 // Returns the driven car when the pose is in a vehicle. Start stays on the title card.
 export function applyShot(name, world) {
   const shot = SHOTS[name];
@@ -310,5 +338,6 @@ export function applyShot(name, world) {
   if (name === 'chase') driven = stageChase(world, shot);
   else if (name === 'onfoot') driven = stageOnFoot(world, shot);
   else if (name === 'city') driven = stageCity(world, shot);
+  else if (name === 'race') driven = stageDocklineRace(world, shot);
   return { driven };
 }

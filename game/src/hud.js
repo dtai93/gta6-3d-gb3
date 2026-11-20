@@ -1,6 +1,8 @@
 // DOM overlay: mission, wanted, cash, clock, police, minimap, vitals, radio, dialogue.
 import { GRID_X, GRID_Z, SPAN } from './config.js';
 import { paintPortrait } from './dialogue.js';
+import { ACTIVITIES } from './activities.js';
+import { DOCK_CREW } from './crew.js';
 
 const RANGE = 42;
 
@@ -24,12 +26,32 @@ function el(root, id) {
 export function createHud(root) {
   const weapons = el(root, 'weapons');
   const slots = [];
+  const crewRows = [];
   for (let i = 0; i < 4; i++) {
     const node = document.createElement('div');
     node.className = 'slot';
     node.innerHTML = '<span></span><b></b>';
     weapons.appendChild(node);
     slots.push(node);
+  }
+  const crewRoot = el(root, 'crew-rows');
+  for (const member of DOCK_CREW) {
+    const row = document.createElement('div');
+    row.className = 'crew-row';
+    const portrait = document.createElement('canvas');
+    portrait.width = 48;
+    portrait.height = 48;
+    paintPortrait(portrait, member.portrait);
+    const info = document.createElement('div');
+    const name = document.createElement('b');
+    name.textContent = member.name.toUpperCase();
+    const ability = document.createElement('span');
+    ability.textContent = member.ability + ' · ' + member.hint;
+    info.append(name, ability);
+    const chip = document.createElement('i');
+    row.append(portrait, info, chip);
+    crewRoot.appendChild(row);
+    crewRows.push({ row, chip });
   }
   return {
     root,
@@ -45,6 +67,15 @@ export function createHud(root) {
     cash: el(root, 'cash'),
     cashPop: el(root, 'cashpop'),
     clock: el(root, 'clock'),
+    rankName: el(root, 'rank-chip').querySelector('b'),
+    rankPoints: el(root, 'rank-chip').querySelector('span'),
+    watch: el(root, 'watch-chip'),
+    crewRows,
+    race: el(root, 'race-panel'),
+    raceName: el(root, 'race-name'),
+    raceProgress: el(root, 'race-progress'),
+    raceNext: el(root, 'race-next'),
+    raceTime: el(root, 'race-time'),
     units: el(root, 'units'),
     notice: el(root, 'notice'),
     hp: el(root, 'hp').querySelector('b'),
@@ -114,6 +145,17 @@ function drawMap(canvas, s) {
     ctx.fill();
     ctx.stroke();
   }
+  for (const activity of ACTIVITIES) {
+    if (activity.kind === 'STORY') continue;
+    const p = P(activity.x, activity.z);
+    ctx.fillStyle = activity.kind === 'RACE' ? '#70e3d2' : activity.kind === 'GARAGE' ? '#f49a71' : '#ffc14a';
+    ctx.strokeStyle = '#12202a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], 8, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+  }
   const cops = s.police || [];
   for (let i = 0; i < cops.length; i++) {
     const p = P(cops[i].x, cops[i].z);
@@ -171,6 +213,25 @@ export function updateHud(hud, s) {
     hud.cashPop.textContent = '+$' + String(Math.round(s.cashPop)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
   } else hud.cashPop.hidden = true;
   hud.clock.textContent = clockText(s.day, s.clock);
+  hud.rankName.textContent = s.respect.title.toUpperCase();
+  hud.rankPoints.textContent = s.respect.rp.toLocaleString('en-US') + ' RP';
+  hud.watch.textContent = s.watch.text;
+  hud.watch.classList.toggle('open', s.watch.open);
+  if (s.crew) {
+    for (let i = 0; i < hud.crewRows.length; i++) {
+      const active = i === s.crew.selected;
+      const cooldown = s.crew.cooldowns[i];
+      hud.crewRows[i].row.className = active ? 'crew-row active' : 'crew-row';
+      hud.crewRows[i].chip.textContent = cooldown > 0 ? Math.ceil(cooldown) + 'S' : active ? 'C READY' : 'READY';
+    }
+  }
+  hud.race.hidden = !s.race.active;
+  if (s.race.active) {
+    hud.raceName.textContent = s.race.title;
+    hud.raceProgress.textContent = 'P' + s.race.position + ' · CHECKPOINT ' + s.race.checkpoint + '/' + s.race.total;
+    hud.raceNext.textContent = 'NEXT  ' + s.race.next;
+    hud.raceTime.textContent = s.race.elapsed.toFixed(1) + 's';
+  }
   const rows = s.police || [];
   if (!rows.length) hud.units.textContent = 'NO UNITS IN RANGE';
   else {
@@ -178,7 +239,7 @@ export function updateHud(hud, s) {
     const n = Math.min(4, rows.length);
     for (let i = 0; i < n; i++) {
       const r = rows[i];
-      const role = r.role === 'chase' ? 'CHASE' : r.role === 'ram' ? 'RAMMING' : r.role === 'roadblock' ? 'ROADBLOCK' : r.role === 'air' ? 'SPOTLIGHT' : r.role;
+      const role = r.tactic || (r.role === 'chase' ? 'CHASE' : r.role === 'ram' ? 'RAMMING' : r.role === 'roadblock' ? 'ROADBLOCK' : r.role === 'air' ? 'SPOTLIGHT' : r.role);
       const chip = role === 'CHASE' ? 'chase' : role === 'RAMMING' ? 'ram' : role === 'ROADBLOCK' ? 'block' : role === 'SPOTLIGHT' ? 'air' : 'other';
       html += '<div class="unit"><span>' + r.callsign + '</span><i class="role-' + chip + '">' + role + '</i><span>' + Math.round(r.dist) + 'm</span></div>';
     }

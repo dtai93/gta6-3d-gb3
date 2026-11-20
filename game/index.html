@@ -25,6 +25,13 @@
   #cash { font: 800 24px/1 sans-serif; color: #ffe08a; }
   #cashpop { font: 800 16px/1 sans-serif; color: #b6ff9a; }
   #clock { font: 700 12px/1.2 sans-serif; letter-spacing: 0.04em; padding: 4px 6px; background: rgba(255,244,230,0.14); border: 1px solid rgba(255,236,214,0.35); }
+  #careerbar { position: absolute; top: 62px; left: 35%; display: flex; gap: 6px; align-items: stretch; }
+  #rank-chip, #watch-chip { padding: 5px 8px; background: rgba(10,12,18,0.76); border: 1px solid rgba(255,236,214,0.28); font: 800 10px/1.2 sans-serif; letter-spacing: 0.08em; }
+  #rank-chip b, #rank-chip span { display: block; }
+  #rank-chip b { color: #ffd27a; }
+  #rank-chip span { color: #fff8ee; }
+  #watch-chip { color: #b7e5ed; }
+  #watch-chip.open { color: #14251b; background: #8de0ad; border-color: #d7ffe2; }
   #police { position: absolute; top: 14px; right: 14px; width: 292px; padding: 10px 12px 8px; }
   #police-kicker { font: 800 12px/1 sans-serif; letter-spacing: 0.16em; color: #9fd0ff; }
   #units { margin-top: 6px; font: 700 15px/1.35 sans-serif; }
@@ -36,6 +43,21 @@
   .unit i.role-air { color: #071629; background: #77d7ff; border-color: #d3f4ff; }
   .unit i.role-other { color: #f2eaff; background: #63489a; border-color: #b7a0e9; }
   #notice { position: absolute; top: 78px; left: 50%; transform: translateX(-50%); padding: 8px 14px; background: rgba(168,36,32,0.92); font: 800 15px/1 sans-serif; letter-spacing: 0.12em; }
+  #crew-panel { position: absolute; top: 218px; left: 14px; width: 292px; padding: 8px 10px; }
+  #crew-title { margin-bottom: 5px; font: 900 10px/1 sans-serif; letter-spacing: 0.18em; color: #8de0d6; }
+  .crew-row { display: flex; align-items: center; gap: 7px; padding: 4px 0; border-top: 1px solid rgba(255,255,255,0.12); }
+  .crew-row.active { background: rgba(255,193,74,0.1); }
+  .crew-row canvas { width: 32px; height: 32px; border: 1px solid #ffc14a; flex: none; }
+  .crew-row div { min-width: 0; flex: 1; }
+  .crew-row b { display: block; font: 800 10px/1.1 sans-serif; letter-spacing: 0.06em; }
+  .crew-row span { display: block; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; font: 600 10px/1.2 sans-serif; color: #d8d1c8; }
+  .crew-row i { min-width: 43px; padding: 3px 4px; text-align: center; font: 900 9px/1 sans-serif; color: #ffe2a0; border: 1px solid rgba(255,193,74,0.55); font-style: normal; }
+  #race-panel[hidden] { display: none; }
+  #race-panel { position: absolute; top: 212px; left: 50%; transform: translateX(-50%); min-width: 260px; padding: 8px 12px; text-align: center; border: 1px solid #ffc14a; background: rgba(10,12,18,0.84); }
+  #race-name { color: #ffc14a; font: 900 12px/1 sans-serif; letter-spacing: 0.16em; }
+  #race-progress { margin-top: 5px; font: 900 15px/1 sans-serif; }
+  #race-next { margin-top: 4px; font: 700 11px/1 sans-serif; color: #c3eee5; }
+  #race-time { position: absolute; top: 8px; right: 10px; font: 800 11px/1 sans-serif; color: #fff8ee; }
   #vitals { position: absolute; left: 14px; bottom: 14px; width: 340px; }
   .lbl { font: 800 11px/1 sans-serif; letter-spacing: 0.14em; color: #ffd0c4; margin-top: 5px; }
   .track { height: 12px; margin-top: 3px; background: #24181c; border: 1px solid rgba(255,255,255,0.25); }
@@ -109,6 +131,11 @@
   #slot { margin-top: 16px; padding: 12px 14px; }
   #slot b { display: block; font: 800 12px/1 sans-serif; letter-spacing: 0.16em; color: #ffc14a; }
   #slot p { margin: 5px 0 0; font: 700 16px/1.3 sans-serif; }
+  .save-slots { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 8px; }
+  .slot-choice { min-width: 0; padding: 8px; text-align: left; color: #fff8ee; background: rgba(3,9,13,0.65); border: 1px solid rgba(255,236,214,0.3); cursor: pointer; }
+  .slot-choice.selected { border-color: #ffc14a; background: rgba(255,193,74,0.15); }
+  .slot-choice b { color: #ffc14a; }
+  .slot-choice span { display: block; margin-top: 4px; font: 650 11px/1.3 sans-serif; }
   #pause, #sheet { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(6,4,8,0.5); }
   #pause .card, #sheet .card { width: 440px; padding: 22px 22px 16px; }
   #pause-kicker, #sheet-kicker { font: 800 13px/1 sans-serif; letter-spacing: 0.2em; color: #ffc14a; }
@@ -118,6 +145,13 @@
   #sheet-body input { width: 220px; }
   #worldmap { position: absolute; inset: 0; background: #102430; }
   #worldmap canvas { width: 100%; height: 100%; display: block; }
+  #garage { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; background: rgba(5,12,16,0.62); }
+  #garage .card { width: 420px; padding: 20px; }
+  #garage[hidden] { display: none !important; }
+  #garage h2 { margin: 4px 0 6px; font: 900 28px/1 sans-serif; }
+  #garage p { margin: 6px 0 14px; color: #cfe0da; font: 650 14px/1.4 sans-serif; }
+  #garage-list { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  #garage-list .mbtn { margin: 0; min-height: 64px; }
   @media (max-width: 900px), (max-height: 520px) {
     #mission { width: 300px; padding: 8px 10px; }
     #mission-kicker { font-size: 10px; }
@@ -125,6 +159,9 @@
     #mission-text { font-size: 13px; }
     #mission-next { font-size: 12px; }
     #topbar { left: 42%; transform: scale(0.82); transform-origin: top left; }
+    #careerbar { left: 42%; top: 54px; transform: scale(0.82); transform-origin: top left; }
+    #crew-panel { top: 180px; width: 250px; }
+    #race-panel { top: 184px; transform: translateX(-50%) scale(0.85); }
     #stars { font-size: 24px; }
     #cash { font-size: 19px; }
     #police { width: 220px; padding: 7px 9px; }
@@ -162,9 +199,23 @@
     <div id="cashpop" hidden>+$1,200</div>
     <div id="clock">DAY 2 · 18:42</div>
   </div>
+  <div id="careerbar">
+    <div id="rank-chip"><b>PIER HAND</b><span>0 RP</span></div>
+    <div id="watch-chip">FERRY 21:10</div>
+  </div>
   <section id="police" class="panel">
     <div id="police-kicker">POLICE RESPONSE</div>
     <div id="units">NO UNITS IN RANGE</div>
+  </section>
+  <section id="crew-panel" class="panel">
+    <div id="crew-title">DOCK CREW · C TO CALL NEXT FAVOR</div>
+    <div id="crew-rows"></div>
+  </section>
+  <section id="race-panel" hidden>
+    <div id="race-name">SOLANO SPRINT</div>
+    <div id="race-progress">P1/4 · CHECKPOINT 1/6</div>
+    <div id="race-next">NEXT FERRY CUT</div>
+    <div id="race-time">00.0s</div>
   </section>
   <div id="notice" hidden>ROADBLOCK</div>
   <section id="vitals">

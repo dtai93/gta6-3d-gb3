@@ -73,6 +73,9 @@ export function createInput(dom) {
         radio: edges.has('KeyQ'),
         pause: edges.has('Escape'),
         map: edges.has('KeyM'),
+        crew: edges.has('KeyC'),
+        race: edges.has('KeyX'),
+        garage: edges.has('KeyG'),
         yaw: mouse.dx,
         pitch: mouse.dy,
       };

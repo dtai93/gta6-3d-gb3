@@ -203,6 +203,7 @@ export function stageMission(state, name) {
 function finishMission(state, world) {
   const job = MISSIONS[state.active];
   world.pay(job.reward);
+  if (world.jobComplete) world.jobComplete(job);
   state.banner = job.title;
   state.bannerCash = job.reward;
   state.bannerT = 6;

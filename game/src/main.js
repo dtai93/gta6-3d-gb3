@@ -24,11 +24,16 @@ import { applyShot } from './shots.js';
 import { WEAPONS } from './weapons.js';
 import { createRadio, cycleRadio, nowPlaying } from './radio.js';
 import { createNeon, updateNeon } from './daynight.js';
-import { SAFEHOUSE, captureState, readSave, writeSave, insideSafehouse, readSettings } from './save.js';
+import { SAFEHOUSE, captureState, readSaves, writeSave, insideSafehouse, readSettings } from './save.js';
 import { createAudio, unlockAudio, setMix, updateAudio } from './audio.js';
 import { createFx, emitBurst, updateFx } from './fx.js';
 import { createMenus } from './menus.js';
 import { drawWorldMap } from './mapscreen.js';
+import { createRespect, addRespect, respectView } from './respect.js';
+import { createCrew, activateCrew, updateCrew, DOCK_CREW } from './crew.js';
+import { createActivities, careerView, recordCarStolen, recordDistance, recordHeatEscape, recordJob, recordRace, harborWatch } from './activities.js';
+import { createRace, DOCKLINE_RACE, startRace, updateRace, raceView } from './races.js';
+import { DOCK_GARAGE, GARAGE_SERVICES, serviceVehicle } from './garage.js';
 
 const params = new URLSearchParams(location.search);
 const shotName = params.get('shot');
@@ -72,6 +77,10 @@ const missions = createMissions(scene);
 const dialogue = createDialogue();
 const radio = createRadio();
 const toast = { text: '', t: 0 };
+let respect = createRespect();
+let activities = createActivities();
+const crew = createCrew();
+const race = createRace();
 let driven = null;
 let orbit = 0;
 let clock = 0;
@@ -111,7 +120,7 @@ scene.add(homePost);
 
 if (!shot) player.mesh.position.set(city.spawn.x, 0, city.spawn.z);
 const staged = shot ? applyShot(shotName, {
-  scene, player, rig, cars, police, combat, wanted, missions, dialogue, toast, peds, radio, testing,
+  scene, player, rig, cars, police, combat, wanted, missions, dialogue, toast, peds, radio, testing, respect, crew, race,
 }) : null;
 if (staged && staged.driven) driven = staged.driven;
 
@@ -160,6 +169,11 @@ function applySave(data) {
   day = data.day || 2;
   dayClock = data.clock == null ? dayClock : data.clock;
   played = data.played || 0;
+  respect = createRespect(data.respectRp);
+  activities = createActivities(data.career);
+  crew.selected = 0;
+  crew.cooldowns.fill(0);
+  Object.assign(race, createRace());
   radio.index = data.radio || 0;
   restoreMission(missions, data.mission);
   const slots = combat.loadout.slots;
@@ -180,12 +194,18 @@ function applySave(data) {
 }
 
 function beginNew() {
+  respect = createRespect();
+  activities = createActivities();
+  crew.selected = 0;
+  crew.cooldowns.fill(0);
+  Object.assign(race, createRace());
   applySave({
     x: city.spawn.x, z: city.spawn.z, yaw: 0,
     health: 100, armour: 40, cash: 480, stars: 0,
     day: 2, clock: 18 * 3600 + 42 * 60, radio: 0,
     mission: { active: -1, stage: 0, progress: 0, cleared: 0 },
     weapons: [], weapon: 0,
+    respectRp: 0, career: {},
   });
   resetLoadout();
   unlockAudio(audio);
@@ -212,6 +232,8 @@ function commitSave(place) {
     weapons: combat.loadout.slots.map((s) => ({ rounds: s.rounds, reserve: s.reserve })),
     weapon: combat.loadout.index,
     played,
+    respectRp: respect.rp,
+    career: careerView(activities),
   });
   if (place === 'SAFEHOUSE') {
     data.x = SAFEHOUSE.x;
@@ -220,9 +242,11 @@ function commitSave(place) {
     data.district = SAFEHOUSE.name;
     setWantedStars(wanted, 0, SAFEHOUSE.x, SAFEHOUSE.z);
   }
-  writeSave(data);
-  menus.setSlot(data);
-  toast.text = place === 'SAFEHOUSE' ? 'SAVED · CORAL SHORE SAFEHOUSE' : place === 'AUTOSAVE' ? 'AUTOSAVE' : 'GAME SAVED';
+  const saved = writeSave(data, menus.selectedSlot);
+  if (saved) menus.setSlot(data);
+  toast.text = saved
+    ? place === 'SAFEHOUSE' ? 'SAVED · CORAL SHORE SAFEHOUSE' : place === 'AUTOSAVE' ? 'AUTOSAVE · SLOT ' + (menus.selectedSlot + 1) : 'GAME SAVED · SLOT ' + (menus.selectedSlot + 1)
+    : 'SAVE FAILED · CHECK BROWSER STORAGE';
   toast.t = 2.6;
 }
 
@@ -234,6 +258,8 @@ function shotPreview() {
     place: 'SAFEHOUSE', district: 'Coral Shore',
     missionTitle: 'MISSION 3/6 · THE TIDE JOB',
     played: 2 * 3600 + 14 * 60,
+    respectRp: 910,
+    career: { jobsDone: 2, carsStolen: 4, heatEscaped: 1, distanceKm: 16.8, racesWon: 0, bestRace: 0 },
     mission: { active: 2, stage: 1, progress: 0.64, cleared: 2 },
     weapons: [], weapon: 1,
   };
@@ -241,6 +267,7 @@ function shotPreview() {
 
 function step(dt, sample) {
   const alive = combat.vitals.state === 'ok';
+  const heatBefore = wanted.stars;
   const fleet = cars.concat(police.units);
   if (driven) {
     if (alive) updateDrivenVehicle(driven, sample, dt);
@@ -276,6 +303,10 @@ function step(dt, sample) {
           dropDriver(peds, door.x, door.z, car.x, car.z);
         }
         if (pulled) reportCrime(wanted, car.cop ? 'officer' : 'carjack', car.x, car.z);
+        if (!car.cop && !car.stolen) {
+          car.stolen = true;
+          recordCarStolen(activities);
+        }
         driven = car;
         let gap = rig.yaw - car.yaw;
         while (gap > Math.PI) gap -= Math.PI * 2;
@@ -315,6 +346,7 @@ function step(dt, sample) {
     time: clock,
   });
   updateWanted(wanted, dt, here.x, here.z);
+  if (heatBefore > 0 && wanted.stars === 0) recordHeatEscape(activities);
   updateCombat(combat, dt, {
     sample, camera, player, driven, peds, police, wanted, cars,
     blocks: city.colliders,
@@ -323,9 +355,38 @@ function step(dt, sample) {
   updateMissions(missions, dt, {
     x: here.x, z: here.z, driven, scene, cars, time: clock,
     pay(n) { combat.vitals.cash += n; },
+    jobComplete() {
+      recordJob(activities);
+      addRespect(respect, 180);
+    },
     say(who, text, sec) { sayLine(dialogue, who, text, sec); },
     notice(text) { toast.text = text; toast.t = 3.6; },
   });
+  if (sample.crew && combat.vitals.state === 'ok') {
+    const result = activateCrew(crew, { wanted, vitals: combat.vitals, driven });
+    toast.text = result.message;
+    toast.t = result.ok ? 3 : 1.8;
+  }
+  updateCrew(crew, dt);
+  if (driven) recordDistance(activities, Math.abs(driven.speed) * dt);
+  if (sample.race) {
+    const distance = Math.hypot(here.x - DOCKLINE_RACE.start.x, here.z - DOCKLINE_RACE.start.z);
+    if (distance <= DOCKLINE_RACE.start.radius && driven) {
+      toast.text = startRace(race) ? 'SOLANO SPRINT · CARGO ROUTE STARTED' : 'SOLANO SPRINT ALREADY RUNNING';
+      toast.t = 3.2;
+    } else {
+      toast.text = 'BRING A CAR TO THE SOLANO SPRINT LINE';
+      toast.t = 2.4;
+    }
+  }
+  if (updateRace(race, dt, { x: here.x, z: here.z, driven })) {
+    recordRace(activities, race.finished);
+    addRespect(respect, 240);
+    combat.vitals.cash += 900;
+    toast.text = 'SOLANO SPRINT WON  +$900  ·  +240 RP';
+    toast.t = 4;
+    if (!shot) commitSave('AUTOSAVE');
+  }
   updateDialogue(dialogue, dt);
   if (toast.t > 0 && toast.t < 900) {
     toast.t -= dt;
@@ -497,7 +558,8 @@ function frameFocus() {
 
 function placeCamera() {
   const hour = (dayClock / 3600) % 24;
-  updateSkyHour(sky, hour);
+  const watch = harborWatch(dayClock);
+  updateSkyHour(sky, hour, watch.open);
   updateNeon(neon, hour);
   const sunset = hour >= 17 && hour < 19.5;
   let exposure = (hour >= 20 || hour < 5) ? 0.98 : sunset ? 1.2 : 1.08;
@@ -530,7 +592,7 @@ menus.onSave = () => commitSave('MANUAL');
 menus.onQuit = () => {
   playing = false;
   input.release();
-  menus.showTitle(readSave());
+  menus.showTitle(readSaves());
 };
 menus.onUnlock = () => unlockAudio(audio);
 canvas.addEventListener('pointerdown', () => unlockAudio(audio));
@@ -539,8 +601,23 @@ menus.onMix = (settings) => {
   CAM.yawSpeed = 0.0022 * settings.sens;
   CAM.pitchSpeed = 0.0018 * settings.sens;
 };
+function garageTarget() {
+  const here = driven || player.mesh.position;
+  return driven || nearestVehicle(cars, here.x, here.z, 10);
+}
+function refreshGarage() {
+  const car = garageTarget();
+  menus.setGarageServices({ items: GARAGE_SERVICES, cash: combat.vitals.cash }, car ? car.type.name : '');
+}
+menus.onGarageAction = (serviceId) => {
+  const result = serviceVehicle(garageTarget(), serviceId, combat.vitals.cash);
+  combat.vitals.cash = result.cash;
+  toast.text = result.message;
+  toast.t = result.ok ? 2.8 : 2;
+  refreshGarage();
+};
 if (playing) menus.showPlay();
-else menus.showTitle(shotName === 'start' ? shotPreview() : readSave());
+else menus.showTitle(shotName === 'start' ? [shotPreview(), null, null] : readSaves());
 savedClear = missions.cleared;
 heardShot = combat.loadout.shot;
 document.getElementById('hud').style.visibility = playing ? 'visible' : 'hidden';
@@ -554,7 +631,9 @@ function tick(now) {
   last = now;
   const sample = rig.frozen ? null : input.sample();
   if (sample && sample.pause) {
-    if (playing && menus.mode === 'play') {
+    if (menus.mode === 'garage') {
+      menus.closeGarage();
+    } else if (playing && menus.mode === 'play') {
       menus.showPause();
       input.release();
     } else if (menus.mode === 'pause' || menus.mode === 'map' || (playing && menus.mode === 'sheet')) {
@@ -566,6 +645,17 @@ function tick(now) {
     else if (menus.mode === 'play') {
       menus.showMap();
       input.release();
+    }
+  }
+  if (sample && sample.garage && playing && menus.mode === 'play') {
+    const here = driven || player.mesh.position;
+    if (Math.hypot(here.x - DOCK_GARAGE.x, here.z - DOCK_GARAGE.z) <= DOCK_GARAGE.radius) {
+      menus.showGarage(driven ? driven.type.name : garageTarget()?.type.name || '');
+      refreshGarage();
+      input.release();
+    } else {
+      toast.text = 'DOCK WORKS · INDUSTRIAL DOCKS';
+      toast.t = 2.4;
     }
   }
   const live = !rig.frozen && playing && menus.mode === 'play';
@@ -649,6 +739,7 @@ function tick(now) {
   placeCamera();
   const here = driven || player.mesh.position;
   const district = districtAt(here.x, here.z);
+  const watch = harborWatch(dayClock);
   pulseBeacon(missions, now);
   const track = nowPlaying(radio);
   document.getElementById('hud').style.visibility = (menus.mode === 'play' || menus.mode === 'pause') ? 'visible' : 'hidden';
@@ -665,6 +756,10 @@ function tick(now) {
     inSight: !!(wanted.seen && wanted.stars > 0),
     day,
     clock: dayClock,
+    respect: respectView(respect),
+    watch,
+    crew: { members: DOCK_CREW, selected: crew.selected, cooldowns: crew.cooldowns },
+    race: raceView(race),
     police: policeRoster(police, here.x, here.z),
     loadout: combat.loadout,
     driven,
@@ -686,6 +781,11 @@ function tick(now) {
       mission: missionView(missions),
       police: policeRoster(police, here.x, here.z),
       district,
+      respect: respectView(respect),
+      career: careerView(activities),
+      cleared: missions.cleared,
+      missions: MISSIONS.map((job) => job.title),
+      saveSlots: menus.saves,
     });
   }
   if (!testing) {

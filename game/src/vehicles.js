@@ -159,11 +159,15 @@ export function createVehicle(typeId, x, z, yaw) {
     driver: built.driver,
     lights: built.lights,
     paint: new THREE.Color(type.color),
+    plate: null,
+    tuned: false,
+    boostT: 0,
     x, z, yaw,
     vx: 0, vz: 0, speed: 0, steer: 0,
     condition: 1,
     ai: false,
     player: false,
+    stolen: false,
     occupied: false,
     horn: 0,
     skid: 0,
@@ -199,6 +203,48 @@ export function damageVehicle(car, amount) {
   car.bodyMat.color.copy(car.paint).lerp(_dark, 1 - car.condition);
 }
 
+export function resprayVehicle(car) {
+  car.paint.setHex(0x20a99a);
+  car.bodyMat.color.copy(car.paint).lerp(_dark, 1 - car.condition);
+}
+
+export function fitDockPlate(car) {
+  if (car.plate) return;
+  const canvas = document.createElement('canvas');
+  canvas.width = 256;
+  canvas.height = 72;
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = '#e9e3ce';
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+  ctx.strokeStyle = '#18313b';
+  ctx.lineWidth = 8;
+  ctx.strokeRect(4, 4, canvas.width - 8, canvas.height - 8);
+  ctx.fillStyle = '#18313b';
+  ctx.font = 'bold 42px sans-serif';
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillText('SOLANO', canvas.width / 2, canvas.height / 2);
+  const texture = new THREE.CanvasTexture(canvas);
+  texture.colorSpace = THREE.SRGBColorSpace;
+  car.plate = new THREE.Mesh(
+    new THREE.PlaneGeometry(0.82, 0.23),
+    new THREE.MeshBasicMaterial({ map: texture }),
+  );
+  car.plate.position.set(0, 0.58, car.type.length * 0.49 + 0.02);
+  car.mesh.add(car.plate);
+}
+
+export function installTideTune(car) {
+  if (car.tuned) return false;
+  car.tuned = true;
+  return true;
+}
+
+export function repairVehicle(car) {
+  car.condition = 1;
+  car.bodyMat.color.copy(car.paint);
+}
+
 export function updateDrivenVehicle(car, sample, dt) {
   const type = car.type;
   yawForward(car.yaw, _fwd);
@@ -217,7 +263,9 @@ export function updateDrivenVehicle(car, sample, dt) {
   car.vx = (_fwd.x * along + latX * grip) * drag;
   car.vz = (_fwd.z * along + latZ * grip) * drag;
   let speed = car.vx * _fwd.x + car.vz * _fwd.z;
-  const cap = speed >= 0 ? type.max : type.max * 0.35;
+  car.boostT = Math.max(0, (car.boostT || 0) - dt);
+  const tunedMax = type.max + (car.tuned ? 3 : 0) + (car.boostT > 0 ? 5 : 0);
+  const cap = speed >= 0 ? tunedMax : tunedMax * 0.35;
   if (Math.abs(speed) > cap) {
     const scale = cap / Math.abs(speed);
     const keepX = car.vx - _fwd.x * speed;

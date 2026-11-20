@@ -427,6 +427,7 @@ export function policeRoster(police, x, z) {
     rows.push({
       callsign: car.callsign,
       role: car.role.toUpperCase(),
+      tactic: car.role === 'ram' ? 'RAMMING' : car.role === 'roadblock' ? 'ROADBLOCK' : car.role === 'chase' ? 'CHASE' : car.role.toUpperCase(),
       dist: Math.hypot(car.x - x, car.z - z),
       x: car.x,
       z: car.z,
@@ -439,6 +440,7 @@ export function policeRoster(police, x, z) {
     rows.push({
       callsign: cop.callsign,
       role: cop.down > 0 ? 'DOWN' : 'FOOT',
+      tactic: cop.down > 0 ? 'DOWN' : 'FOOT',
       dist: Math.hypot(cop.x - x, cop.z - z),
       x: cop.x,
       z: cop.z,
@@ -449,6 +451,7 @@ export function policeRoster(police, x, z) {
     rows.push({
       callsign: police.callsign,
       role: 'AIR',
+      tactic: 'SPOTLIGHT',
       dist: Math.hypot(police.hx - x, police.hz - z),
       x: police.hx,
       z: police.hz,

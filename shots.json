@@ -2,5 +2,6 @@
   { "name": "1-chase.jpg", "query": "?shot=chase&seed=1" },
   { "name": "2-onfoot.jpg", "query": "?shot=onfoot&seed=1" },
   { "name": "3-city.jpg", "query": "?shot=city&seed=1" },
-  { "name": "4-start.jpg", "query": "?shot=start&seed=1" }
+  { "name": "4-start.jpg", "query": "?shot=start&seed=1" },
+  { "name": "staged race scene (not captured)", "query": "?shot=race&seed=1", "capture": false }
 ]

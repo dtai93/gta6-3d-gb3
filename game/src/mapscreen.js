@@ -1,7 +1,8 @@
 // Full-city map. North is +Z, up the canvas. Ocean sits at z < 0.
 
 import { GRID_X, GRID_Z, SPAN } from './config.js';
-import { SAFEHOUSE } from './save.js';
+import { ACTIVITIES } from './activities.js';
+import { DOCK_CREW } from './crew.js';
 
 const MARKS = [
   [1, 0, 'CORAL SHORE'],
@@ -15,6 +16,7 @@ export function drawWorldMap(canvas, s) {
   const w = canvas.width = Math.max(640, canvas.clientWidth || 1280);
   const h = canvas.height = Math.max(480, canvas.clientHeight || 800);
   const ctx = canvas.getContext('2d');
+  const mapW = Math.floor(w * 0.69);
   const minX = -36;
   const maxX = GRID_X * SPAN + 24;
   const minZ = -48;
@@ -22,7 +24,7 @@ export function drawWorldMap(canvas, s) {
   function P(x, z) {
     const u = (x - minX) / (maxX - minX);
     const v = (z - minZ) / (maxZ - minZ);
-    return [28 + u * (w - 56), h - 28 - v * (h - 56)];
+    return [28 + u * (mapW - 56), h - 28 - v * (h - 56)];
   }
   ctx.fillStyle = '#102430';
   ctx.fillRect(0, 0, w, h);
@@ -60,15 +62,31 @@ export function drawWorldMap(canvas, s) {
     const p = P((m[0] + 0.5) * SPAN, (m[1] + 0.5) * SPAN);
     ctx.fillText(m[2], p[0], p[1]);
   }
-  const home = P(SAFEHOUSE.x, SAFEHOUSE.z);
-  ctx.fillStyle = '#ffc14a';
-  ctx.fillRect(home[0] - 7, home[1] - 7, 14, 14);
-  ctx.fillStyle = '#1a1208';
-  ctx.font = '800 13px sans-serif';
-  ctx.fillText('SAFEHOUSE', home[0], home[1] - 14);
+  for (const activity of ACTIVITIES) {
+    const p = P(activity.x, activity.z);
+    const story = activity.kind === 'STORY';
+    if (story) { p[0] += 14; p[1] -= 14; }
+    ctx.fillStyle = activity.kind === 'SAFEHOUSE' ? '#ffc14a' : activity.kind === 'RACE' ? '#74e5d3' : story ? '#d9b7ff' : '#f4986a';
+    ctx.strokeStyle = '#12232a';
+    ctx.lineWidth = 3;
+    ctx.beginPath();
+    ctx.arc(p[0], p[1], 10, 0, Math.PI * 2);
+    ctx.fill();
+    ctx.stroke();
+    ctx.fillStyle = '#10212a';
+    ctx.font = '900 11px sans-serif';
+    ctx.fillText(activity.kind === 'SAFEHOUSE' ? 'H' : activity.kind === 'RACE' ? 'R' : story ? 'C' : 'G', p[0], p[1] + 4);
+    ctx.fillStyle = '#fff4df';
+    ctx.font = '800 11px sans-serif';
+    ctx.textAlign = 'left';
+    ctx.fillText(story ? 'CONTACT' : activity.kind, p[0] + 13, p[1] + 4);
+    ctx.textAlign = 'center';
+  }
   const job = s.mission;
   if (job && job.hasBlip) {
     const p = P(job.x, job.z);
+    p[0] -= 14;
+    p[1] -= 14;
     ctx.fillStyle = '#ffc14a';
     ctx.beginPath();
     ctx.arc(p[0], p[1], 11, 0, Math.PI * 2);
@@ -96,12 +114,104 @@ export function drawWorldMap(canvas, s) {
   ctx.closePath();
   ctx.fill();
   ctx.restore();
-  ctx.fillStyle = '#fff8ee';
+  ctx.fillStyle = 'rgba(7,14,20,0.96)';
+  ctx.fillRect(mapW, 0, w - mapW, h);
+  ctx.strokeStyle = '#8f8067';
+  ctx.lineWidth = 2;
+  ctx.beginPath();
+  ctx.moveTo(mapW, 0);
+  ctx.lineTo(mapW, h);
+  ctx.stroke();
   ctx.textAlign = 'left';
-  ctx.font = '800 28px sans-serif';
-  ctx.fillText('PORT SOLANO', 36, 48);
-  ctx.font = '700 14px sans-serif';
+  ctx.fillStyle = '#fff8ee';
+  ctx.font = '900 25px sans-serif';
+  ctx.fillText('PORT SOLANO', 30, 42);
+  ctx.font = '800 15px sans-serif';
+  ctx.fillStyle = '#ffd27a';
+  ctx.fillText('MAP + CAREER  ·  M OR ESC CLOSES', 30, 67);
+  ctx.font = '800 14px sans-serif';
+  ctx.fillStyle = '#bce6e4';
+  ctx.fillText((s.district || '').toUpperCase() + '  ·  RAFA QUILL', 30, 91);
+
+  const sx = mapW + 24;
+  const sw = w - sx - 20;
+  ctx.fillStyle = '#ffc14a';
+  ctx.font = '900 17px sans-serif';
+  ctx.fillText('WATERFRONT RESPECT', sx, 42);
+  ctx.fillStyle = '#fff8ee';
+  ctx.font = '900 21px sans-serif';
+  ctx.fillText(s.respect.title.toUpperCase(), sx, 70);
+  ctx.font = '700 15px sans-serif';
+  ctx.fillStyle = '#ffe4ae';
+  ctx.fillText(s.respect.rp.toLocaleString('en-US') + ' RP', sx, 94);
+
+  const stats = [
+    ['STORY JOBS', s.career.jobsDone + ' / ' + s.missions.length],
+    ['CARS TAKEN', String(s.career.carsStolen)],
+    ['HEAT ESCAPES', String(s.career.heatEscaped)],
+    ['DISTANCE', s.career.distanceKm.toFixed(1) + ' KM'],
+    ['RACE WINS', String(s.career.racesWon)],
+    ['BEST SOLANO SPRINT', s.career.bestRace ? s.career.bestRace.toFixed(1) + 'S' : 'NO TIME'],
+  ];
+  let sy = 130;
+  for (const [label, value] of stats) {
+    ctx.fillStyle = '#9fb0b4';
+    ctx.font = '800 11px sans-serif';
+    ctx.fillText(label, sx, sy);
+    ctx.fillStyle = '#fff8ee';
+    ctx.font = '900 17px sans-serif';
+    ctx.textAlign = 'right';
+    ctx.fillText(value, sx + sw, sy);
+    ctx.textAlign = 'left';
+    sy += 37;
+  }
+  sy += 8;
+  ctx.strokeStyle = 'rgba(255,255,255,0.18)';
+  ctx.beginPath();
+  ctx.moveTo(sx, sy);
+  ctx.lineTo(sx + sw, sy);
+  ctx.stroke();
+  sy += 28;
+  ctx.fillStyle = '#ffc14a';
+  ctx.font = '900 15px sans-serif';
+  ctx.fillText('STORY CHECKLIST', sx, sy);
+  sy += 23;
+  for (let i = 0; i < s.missions.length; i++) {
+    const done = i < s.cleared;
+    ctx.fillStyle = done ? '#8de0ad' : '#e5ddd0';
+    ctx.font = '700 12px sans-serif';
+    ctx.fillText((done ? '✓ ' : '○ ') + s.missions[i], sx, sy);
+    sy += 20;
+  }
+  sy += 9;
+  ctx.fillStyle = '#72d9d2';
+  ctx.font = '900 15px sans-serif';
+  ctx.fillText('DOCK CREW  ·  C CALLS NEXT FAVOR', sx, sy);
+  sy += 23;
+  for (const member of DOCK_CREW) {
+    ctx.fillStyle = '#fff8ee';
+    ctx.font = '800 12px sans-serif';
+    ctx.fillText(member.name.toUpperCase() + '  /  ' + member.ability.toUpperCase(), sx, sy);
+    sy += 20;
+  }
+  sy += 8;
+  ctx.fillStyle = '#ffc14a';
+  ctx.font = '900 15px sans-serif';
+  ctx.fillText('SAVE SLOTS  ·  PAUSE TO WRITE', sx, sy);
+  sy += 23;
+  for (let i = 0; i < s.saveSlots.length; i++) {
+    const save = s.saveSlots[i];
+    ctx.fillStyle = save ? '#e5ddd0' : '#91a2a4';
+    ctx.font = '700 11px sans-serif';
+    const label = save
+      ? 'SLOT ' + (i + 1) + '  ·  DAY ' + save.day + '  ·  ' + (save.district || 'PORT SOLANO') + '  ·  $' + Math.floor(save.cash)
+      : 'SLOT ' + (i + 1) + '  ·  EMPTY';
+    ctx.fillText(label, sx, sy);
+    sy += 18;
+  }
   ctx.fillStyle = '#ffd7b0';
-  ctx.fillText('WORLD MAP  ·  M OR ESC CLOSES', 36, 72);
-  ctx.fillText(s.district ? s.district.toUpperCase() : '', 36, 94);
+  ctx.font = '700 12px sans-serif';
+  const nextJob = s.mission;
+  const jobLine = nextJob && nextJob.hasBlip ? 'NEXT JOB  ·  ' + nextJob.title : 'NEXT JOB  ·  PORT SOLANO FREE ROAM';
+  ctx.fillText(jobLine.slice(0, 40), sx, h - 28);
 }

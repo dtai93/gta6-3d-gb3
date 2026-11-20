@@ -2,6 +2,8 @@
 
 const KEY = 'port-solano-v1';
 const SET_KEY = 'port-solano-settings';
+const SLOT_KEYS = ['port-solano-slot-1', 'port-solano-slot-2', 'port-solano-slot-3'];
+export const SAVE_SLOTS = 3;
 
 export const SAFEHOUSE = { x: 44, z: 22, r: 8, name: 'Coral Shore' };
 
@@ -42,24 +44,38 @@ export function captureState(s) {
     weapons: s.weapons || [],
     weapon: s.weapon | 0,
     played: s.played || 0,
+    respectRp: s.respectRp || 0,
+    career: s.career || {},
   };
 }
 
-export function readSave() {
+function parseSave(raw) {
+  if (!raw) return null;
+  const data = JSON.parse(raw);
+  if (!data || data.v !== 1 || !data.mission) return null;
+  return data;
+}
+
+export function readSave(slot = 0) {
+  if (!Number.isInteger(slot) || slot < 0 || slot >= SAVE_SLOTS) return null;
   try {
-    const raw = localStorage.getItem(KEY);
-    if (!raw) return null;
-    const data = JSON.parse(raw);
-    if (!data || data.v !== 1 || !data.mission) return null;
-    return data;
+    return parseSave(localStorage.getItem(SLOT_KEYS[slot]))
+      || (slot === 0 ? parseSave(localStorage.getItem(KEY)) : null);
   } catch (err) {
     return null;
   }
 }
 
-export function writeSave(data) {
+export function readSaves() {
+  return Array.from({ length: SAVE_SLOTS }, (_, slot) => readSave(slot));
+}
+
+export function writeSave(data, slot = 0) {
+  if (!Number.isInteger(slot) || slot < 0 || slot >= SAVE_SLOTS) return false;
   try {
-    localStorage.setItem(KEY, JSON.stringify(data));
+    const raw = JSON.stringify(data);
+    localStorage.setItem(SLOT_KEYS[slot], raw);
+    if (slot === 0) localStorage.setItem(KEY, raw);
     return true;
   } catch (err) {
     return false;

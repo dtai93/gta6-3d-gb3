@@ -1,6 +1,6 @@
 // Title, pause, controls, settings, and the save-slot card.
 
-import { readSettings, writeSettings } from './save.js';
+import { SAVE_SLOTS, readSaves, readSettings, writeSettings } from './save.js';
 
 function clockText(sec) {
   const h = Math.floor(sec / 3600) % 24;
@@ -41,6 +41,9 @@ const CONTROLS = [
   'MOUSE look    LMB fire    RMB aim',
   '1–4 weapons    R reload    Q radio',
   'M world map    ESC pause',
+  'C call the next dock-crew favor',
+  'X start Solano Sprint at the Old Harbor line',
+  'G open Dock Works at Industrial Docks',
   'Walk into the Coral Shore safehouse to save.',
   'A finished job writes an autosave.',
 ].join('<br>');
@@ -51,7 +54,7 @@ export function createMenus(root) {
     '<section id="boot" hidden>',
     '<div class="col">',
     '<div id="logo"><i>THE CORAL COAST</i>PORT SOLANO</div>',
-    '<p id="tag">Six jobs along a sunset shore. Steal a car, lose the gulls, get paid.</p>',
+    '<p id="tag">Six story jobs, dockside races and favors along a sunset shore. Earn your name on the waterfront.</p>',
     '<button type="button" id="new-game" class="mbtn">NEW GAME</button>',
     '<button type="button" id="continue" class="mbtn">CONTINUE</button>',
     '<button type="button" id="controls" class="mbtn">CONTROLS</button>',
@@ -73,26 +76,38 @@ export function createMenus(root) {
     '<button type="button" id="sheet-back" class="mbtn">BACK</button>',
     '</div></section>',
     '<section id="worldmap" hidden><canvas id="worldmap-canvas"></canvas></section>',
+    '<section id="garage" hidden><div class="card panel">',
+    '<div id="garage-kicker" class="help">INDUSTRIAL DOCKS · SERVICE STALL</div>',
+    '<h2>DOCK WORKS</h2><p id="garage-car"></p>',
+    '<div id="garage-list"></div>',
+    '<button type="button" id="garage-close" class="mbtn">LEAVE STALL</button>',
+    '</div></section>',
   ].join('');
 
   const boot = root.querySelector('#boot');
   const pause = root.querySelector('#pause');
   const sheet = root.querySelector('#sheet');
   const worldmap = root.querySelector('#worldmap');
+  const garage = root.querySelector('#garage');
   const slot = root.querySelector('#slot');
   const cont = root.querySelector('#continue');
+  const garageList = root.querySelector('#garage-list');
   let backMode = 'title';
+  let selectedSlot = 0;
 
   const api = {
     mode: 'play',
     settings,
     preview: null,
+    saves: readSaves(),
+    selectedSlot: 0,
     mapCanvas: root.querySelector('#worldmap-canvas'),
     onNew: null,
     onContinue: null,
     onSave: null,
     onQuit: null,
     onMix: null,
+    onGarageAction: null,
   };
 
   function hideAll() {
@@ -100,22 +115,28 @@ export function createMenus(root) {
     pause.hidden = true;
     sheet.hidden = true;
     worldmap.hidden = true;
+    garage.hidden = true;
   }
 
-  function paintSlot(save) {
-    api.preview = save;
-    cont.disabled = !save;
-    if (!save) {
-      slot.innerHTML = '<b>SAVE SLOT</b><p>Empty</p><p>Coral Shore safehouse</p><p>New Game starts on the shore road.</p>';
-      return;
+  function paintSlot(saves) {
+    api.saves = Array.isArray(saves) ? saves.slice(0, SAVE_SLOTS) : [saves || null];
+    while (api.saves.length < SAVE_SLOTS) api.saves.push(null);
+    selectedSlot = Math.max(0, Math.min(SAVE_SLOTS - 1, selectedSlot));
+    api.selectedSlot = selectedSlot;
+    api.preview = api.saves[selectedSlot];
+    cont.disabled = !api.preview;
+    slot.innerHTML = '<b>PORT SOLANO SAVES · SLOT ' + (selectedSlot + 1) + '</b><div class="save-slots">'
+      + api.saves.map((save, i) => '<button type="button" class="slot-choice' + (i === selectedSlot ? ' selected' : '') + '" data-slot="' + i + '">'
+        + '<b>SLOT ' + (i + 1) + '</b><span>' + (save
+          ? 'DAY ' + save.day + ' · ' + (save.district || 'Port Solano') + '<br>' + money(save.cash) + ' · ' + (save.missionTitle || 'Free roam')
+          : 'EMPTY · NEW SHORE RUN') + '</span></button>').join('')
+      + '</div>';
+    for (const choice of slot.querySelectorAll('.slot-choice')) {
+      choice.onclick = () => {
+        selectedSlot = Number(choice.dataset.slot);
+        paintSlot(api.saves);
+      };
     }
-    const played = save.played ? '<p>PLAYED ' + playedText(save.played) + '</p>' : '';
-    slot.innerHTML = '<b>SAVE SLOT · ' + (save.place || 'SAVE') + '</b>'
-      + '<p>DAY ' + save.day + ' · ' + clockText(save.clock) + '</p>'
-      + played
-      + '<p>' + (save.district || 'Port Solano') + ' · ' + placeLine(save) + '</p>'
-      + '<p>' + money(save.cash) + ' · ' + (save.missionTitle || '') + '</p>'
-      + '<p>' + stars(save.stars) + '</p>';
   }
 
   function pushMix() {
@@ -143,7 +164,20 @@ export function createMenus(root) {
     worldmap.hidden = false;
     api.mode = 'map';
   };
-  api.setSlot = paintSlot;
+  api.showGarage = function showGarage(carName) {
+    hideAll();
+    garage.hidden = false;
+    api.mode = 'garage';
+    root.querySelector('#garage-car').textContent = carName
+      ? 'CURRENT VEHICLE · ' + carName.toUpperCase() + ' · CHARGES COME FROM CASH'
+      : 'NO VEHICLE IN THE BAY · BRING A CAR TO BUY SERVICE';
+  };
+  api.closeGarage = api.showPlay;
+  api.setSlot = function setSlot(save) {
+    const updated = api.saves.slice();
+    updated[selectedSlot] = save;
+    paintSlot(updated);
+  };
 
   function openSheet(kind, from) {
     backMode = from;
@@ -180,7 +214,7 @@ export function createMenus(root) {
 
   function goBack() {
     if (backMode === 'pause') api.showPause();
-    else api.showTitle(api.preview);
+    else api.showTitle(api.saves);
   }
 
   root.addEventListener('pointerdown', () => { if (api.onUnlock) api.onUnlock(); });
@@ -190,10 +224,21 @@ export function createMenus(root) {
   root.querySelector('#settings').onclick = () => openSheet('settings', 'title');
   root.querySelector('#resume').onclick = () => api.showPlay();
   root.querySelector('#save-now').onclick = () => { if (api.onSave) api.onSave(); };
+  root.querySelector('#open-map').textContent = 'MAP + STATS';
   root.querySelector('#open-map').onclick = () => api.showMap();
   root.querySelector('#pause-controls').onclick = () => openSheet('controls', 'pause');
   root.querySelector('#pause-settings').onclick = () => openSheet('settings', 'pause');
   root.querySelector('#quit-title').onclick = () => { if (api.onQuit) api.onQuit(); };
   root.querySelector('#sheet-back').onclick = goBack;
+  root.querySelector('#garage-close').onclick = () => api.closeGarage();
+  garageList.addEventListener('click', (event) => {
+    const button = event.target.closest('[data-service]');
+    if (button && api.onGarageAction) api.onGarageAction(button.dataset.service);
+  });
+  api.setGarageServices = function setGarageServices(services, carName) {
+    if (carName) root.querySelector('#garage-car').textContent = 'CURRENT VEHICLE · ' + carName.toUpperCase() + ' · CASH $' + money(services.cash);
+    garageList.innerHTML = services.items.map((service) => '<button type="button" class="mbtn" data-service="' + service.id + '">'
+      + service.title.toUpperCase() + '<br><small>' + service.detail + ' · $' + service.cost + '</small></button>').join('');
+  };
   return api;
 }

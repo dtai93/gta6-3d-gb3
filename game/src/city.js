@@ -396,12 +396,14 @@ function addSigns(root) {
     ['NEON STRIP', 'open all night', '#241433', '#3df0dc', 150, 120],
     ['REEF 98', 'port solano radio', '#123044', '#ffd27a', 96, 70],
     ['OLD HARBOR', 'co-op market', '#6e5344', '#f3e6d4', 210, 18],
+    ['SOLANO SPRINT', 'CARGO RUN', '#17394a', '#f3c96c', 132, 52],
+    ['DOCK SERVICE', 'INDUSTRIAL DOCKS', '#17483f', '#7ce0cb', 224, 130],
   ];
   for (let i = 0; i < signs.length; i++) {
     const s = signs[i];
     const sign = makeSign(s[0], s[1], s[2], s[3]);
     sign.position.set(s[4], 0, s[5]);
-    sign.rotation.y = i === 1 ? 0.6 : -0.4;
+    sign.rotation.y = i === 1 ? 0.6 : i >= 4 ? Math.PI : -0.4;
     root.add(sign);
   }
 }

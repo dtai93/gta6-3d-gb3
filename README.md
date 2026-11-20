@@ -1,6 +1,6 @@
 # Port Solano
 
-Port Solano is an original open-world crime game on a fictional sunset coast. You play Rafa Quill through six jobs across Coral Shore, Old Harbor, the Neon Strip, Palm Heights, and the Industrial Docks: steal a car, lose the Port Authority, and get paid. The city is a real-time three.js world with traffic, pedestrians, a five-star wanted response, combat, a radio, and a save slot. Nothing in it is from a commercial crime game.
+Port Solano is an original open-world crime game on a fictional sunset coast. Rafa Quill works six story jobs across Coral Shore, Old Harbor, the Neon Strip, Palm Heights, and the Industrial Docks, with a dock-cargo race, crew favors, waterfront reputation, and a working service stall between jobs. Nothing in it is from a commercial crime game.
 
 ## Features
 
@@ -10,8 +10,13 @@ Port Solano is an original open-world crime game on a fictional sunset coast. Yo
 - Wanted stars, cruisers that ram and block the road, foot officers, and the KESTREL-1 helicopter
 - Four weapons, armour, and hospital or station respawn
 - Six story jobs with staged objectives, cash, and dialogue
-- HUD: mission panel, police call-signs, circular minimap, health, armour, weapons, speedometer, radio, and portraits
-- Title, pause, controls, settings, full-city map, one save slot, and a day-to-night sky
+- Waterfront respect ranks and RP, plus Nia Voss, Mateo Sol, and Jun Park crew favors with cooldowns
+- Solano Sprint cargo/causeway race with staged checkpoints, position, and time
+- Industrial Docks Dock Works stall: respray, SOLANO plates, Tide tune, and repairs
+- Career ledger for stolen cars, heat escapes, distance, jobs, race wins, and best race time
+- HUD: mission panel, crew portraits and abilities, respect, ferry window, police tactics, circular minimap, health, armour, weapons, speedometer, radio, and dialogue
+- Pause MAP + STATS: named districts, safehouse/contact/race/garage/job icons, story checklist, career, crew, respect, and all three save slots
+- Title, pause, controls, settings, full-city map, three save slots, and a day-to-night sky
 - Synth radio: Lagoon FM, Harbor Wire, Neon After, Dock Static, Palm Hours
 
 ## Controls
@@ -28,10 +33,13 @@ Port Solano is an original open-world crime game on a fictional sunset coast. Yo
 | 1–4 | Weapon slots |
 | R | Reload |
 | Q | Next radio station |
+| C | Call the next dock-crew favor |
+| X | Start Solano Sprint at the Old Harbor line |
+| G | Open Dock Works at Industrial Docks |
 | M | World map |
 | Escape | Pause |
 
-Walk into the Coral Shore safehouse to clear heat and save. Finishing a job writes an autosave. In a car, Space is the handbrake.
+Walk into the Coral Shore safehouse to clear heat and save. Finishing a job or race writes an autosave. In a car, Space is the handbrake.
 
 ## Run it
 
