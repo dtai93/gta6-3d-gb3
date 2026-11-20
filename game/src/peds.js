@@ -10,6 +10,12 @@ const LEG = new THREE.BoxGeometry(0.13, 0.64, 0.14);
 const HEAD = new THREE.SphereGeometry(0.13, 6, 5);
 const SKIN = new THREE.MeshLambertMaterial({ color: 0xd9a27a });
 const SHOE = new THREE.MeshLambertMaterial({ color: 0x1a1c22 });
+const HAIR = [0x2b211b, 0x171b22, 0x62402c, 0x873f32, 0x302a3d, 0x4c3a28].map(
+  (color) => new THREE.MeshLambertMaterial({ color }),
+);
+const TROUSERS = [0x29354a, 0x514342, 0x394643, 0x354d68, 0x554b3c, 0x262b35].map(
+  (color) => new THREE.MeshLambertMaterial({ color }),
+);
 const CLOTHES = [0x1f8a86, 0xc43737, 0xe0a030, 0x2d6e9c, 0x6e5344, 0xf4f1ea, 0x243044, 0xd46aa4];
 const INSET = 0.95;
 const _fwd = new THREE.Vector3();
@@ -26,7 +32,7 @@ function spot(ix, iz, edge, t) {
   return { x: x0, z: z1 + (z0 - z1) * t, dx: 0, dz: -1 };
 }
 
-function makePed(root, ix, iz, edge, t, color, speed) {
+function makePed(root, ix, iz, edge, t, color, speed, look = 0) {
   const mesh = new THREE.Group();
   const shirt = new THREE.MeshLambertMaterial({ color });
   const body = new THREE.Mesh(BODY, shirt);
@@ -34,12 +40,21 @@ function makePed(root, ix, iz, edge, t, color, speed) {
   body.castShadow = true;
   const head = new THREE.Mesh(HEAD, SKIN);
   head.position.y = 1.4;
+  const hair = new THREE.Mesh(new THREE.SphereGeometry(0.135, 6, 5), HAIR[look % HAIR.length]);
+  hair.position.set(0, 1.47, 0.008);
+  hair.scale.set(1.03, 0.62, 1.1);
+  const fringe = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.045, 0.05), HAIR[look % HAIR.length]);
+  fringe.position.set(0, 1.42, -0.11);
+  const armL = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.38, 0.13), shirt);
+  const armR = armL.clone();
+  armL.position.set(-0.25, 1.02, 0);
+  armR.position.set(0.25, 1.02, 0);
   const legL = new THREE.Group();
   const legR = new THREE.Group();
   legL.position.set(-0.1, 0.7, 0);
   legR.position.set(0.1, 0.7, 0);
-  const limbL = new THREE.Mesh(LEG, shirt);
-  const limbR = new THREE.Mesh(LEG, shirt);
+  const limbL = new THREE.Mesh(LEG, TROUSERS[look % TROUSERS.length]);
+  const limbR = new THREE.Mesh(LEG, TROUSERS[look % TROUSERS.length]);
   limbL.position.y = -0.32;
   limbR.position.y = -0.32;
   const shoeL = new THREE.Mesh(new THREE.BoxGeometry(0.14, 0.07, 0.2), SHOE);
@@ -48,7 +63,7 @@ function makePed(root, ix, iz, edge, t, color, speed) {
   shoeR.position.set(0, -0.66, -0.02);
   legL.add(limbL, shoeL);
   legR.add(limbR, shoeR);
-  mesh.add(body, head, legL, legR);
+  mesh.add(body, head, hair, fringe, armL, armR, legL, legR);
   const at = spot(ix, iz, edge, t);
   mesh.position.set(at.x, 0, at.z);
   mesh.rotation.y = yawFromDir(at.dx, at.dz);
@@ -63,15 +78,17 @@ function makePed(root, ix, iz, edge, t, color, speed) {
 export function createPeds(scene, rng) {
   const root = new THREE.Group();
   scene.add(root);
-  const list = [
-    makePed(root, 3, 1, 3, 0.42, 0x1f8a86, 1.25),
-    makePed(root, 2, 1, 1, 0.55, 0xc43737, 1.15),
-    makePed(root, 3, 0, 0, 0.3, 0xe0a030, 1.05),
-  ];
-  for (let iz = 0; iz < GRID_Z && list.length < 22; iz++) {
-    for (let ix = 0; ix < GRID_X && list.length < 22; ix++) {
-      if (rng() < 0.45) continue;
-      list.push(makePed(root, ix, iz, rngInt(rng, 0, 3), rng(), CLOTHES[list.length % CLOTHES.length], 0.9 + rng() * 0.6));
+  const list = [];
+  for (let iz = 0; iz < GRID_Z && list.length < 34; iz++) {
+    for (let ix = 0; ix < GRID_X && list.length < 34; ix++) {
+      const count = rng() < 0.42 ? 2 : 1;
+      for (let n = 0; n < count && list.length < 34; n++) {
+        const look = list.length;
+        list.push(makePed(
+          root, ix, iz, rngInt(rng, 0, 3), rng(),
+          CLOTHES[look % CLOTHES.length], 0.9 + rng() * 0.6, look,
+        ));
+      }
     }
   }
   return { root, list };

@@ -7,7 +7,8 @@ const SKIN = 0xd9a27a;
 const SHIRT = 0x1f8a86;
 const PANTS = 0x243044;
 const SHOE = 0x1a1c22;
-const HAIR = 0x2a211c;
+const HAIR = 0x29211e;
+const JACKET_TRIM = 0xf0c16a;
 
 function part(geo, color, x, y, z) {
   const mesh = new THREE.Mesh(geo, new THREE.MeshLambertMaterial({ color }));
@@ -30,10 +31,14 @@ export function createPlayer() {
 
   body.add(part(new THREE.BoxGeometry(0.46, 0.52, 0.26), SHIRT, 0, 1.22, 0));
   body.add(part(new THREE.SphereGeometry(0.16, 8, 7), SKIN, 0, 1.62, 0));
-  body.add(part(new THREE.BoxGeometry(0.18, 0.08, 0.18), HAIR, 0, 1.76, -0.01));
+  const hair = part(new THREE.SphereGeometry(0.165, 8, 6), HAIR, 0, 1.71, 0.015);
+  hair.scale.set(1.05, 0.62, 1.08);
+  body.add(hair);
+  body.add(part(new THREE.BoxGeometry(0.14, 0.055, 0.045), HAIR, 0, 1.63, -0.13));
+  body.add(part(new THREE.BoxGeometry(0.34, 0.055, 0.28), JACKET_TRIM, 0, 1.44, 0));
 
-  const armL = limb(SKIN, 0.1, 0.46, 0.1);
-  const armR = limb(SKIN, 0.1, 0.46, 0.1);
+  const armL = limb(SHIRT, 0.14, 0.46, 0.14);
+  const armR = limb(SHIRT, 0.14, 0.46, 0.14);
   armL.position.set(-0.3, 1.42, 0);
   armR.position.set(0.3, 1.42, 0);
   body.add(armL, armR);

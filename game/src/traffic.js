@@ -92,7 +92,7 @@ export function createTraffic(scene, rng) {
     const h = heroes[i];
     addCar(scene, cars, h[0], h[1], h[2], h[3], h[4], h[5], h[6], h[7], h[8], h[9]);
   }
-  for (let i = 0; i < 14; i++) {
+  for (let i = 0; i < 16; i++) {
     const vertical = i % 2 === 0;
     const dir = i % 4 < 2 ? 1 : -1;
     const typeId = (i + 2) % 5;

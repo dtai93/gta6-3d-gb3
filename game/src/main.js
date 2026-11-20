@@ -46,7 +46,6 @@ const baseFov = wide ? 48 : 58;
 const canvas = document.getElementById('view');
 const statusEl = document.getElementById('status');
 const hud = createHud(document.getElementById('hud'));
-if (shotName === 'chase') document.getElementById('chase-air').classList.add('show');
 
 const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, preserveDrawingBuffer: true });
 renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 1.5));

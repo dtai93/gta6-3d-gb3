@@ -4,7 +4,8 @@ Port Solano is an original open-world crime game on a fictional sunset coast. Ra
 
 ## Features
 
-- Driveable city: roads, sidewalks, hotels, neon, palms, lamps, billboards, and a beach
+- Driveable city: warm plaster, brick and dock facades, neon hotels, palms, beach loungers, and lit streets
+- Original waterfront landmarks: Ferry Cut landing, Solano Light beacon, and the Crane Gate dock crane
 - Five original cars (Solano Sprint, Harbor Cab, Dock Hauler, Port Sentinel, Reef Runner) with arcade handling, damage, and carjacking
 - Lane traffic and pedestrians who watch, flee, and get knocked down
 - Wanted stars, cruisers that ram and block the road, foot officers, and the KESTREL-1 helicopter

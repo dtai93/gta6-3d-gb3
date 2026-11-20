@@ -183,3 +183,11 @@ The staged roadblock and cones now sit ahead of the Sprint, and two pedestrians 
 No screenshots were recaptured or replaced in this step. `game/index.html` adds the respect/ferry chips, crew panel, race panel, three-slot card, and service-shop styling. README features and controls were updated; the three make.fun badges and footer remain unchanged.
 
 Validation on port 18804: `?test=1&seed=1` reports `drive-test ok` with no page exceptions. The staged race scene shows checkpoint 3/6 and all three crew rows. Opening M renders the map, all five activity/job markers, story and career sections, crew, respect, and three save slots without exceptions. Browser checks exercised respray, plates, tune, repairs, race finish, rank-up, and three independent save slots. `MAKEFUN_OUTPUT_DIR=/tmp/g6aout node main.ts` writes `dossier.json`, copies `game/`, and retains exactly four JPEGs.
+
+## Living city and readability pass
+
+The sunset horizon and warm fill are brighter, asphalt reads as sunlit charcoal, and Neon Strip mid-rises use lighter varied facades. Storefront awnings, beach umbrellas and loungers, Ferry Cut landing, Solano Light beacon, and the Crane Gate dock crane give the coast distinct silhouettes and original signs. Avenue crowns and palms retain their local neon / hotel identity.
+
+Sidewalk crowds are seeded and capped at 34 pedestrians, with distinct hair, shirts, trousers, and visible arms; traffic adds two more capped lane cars. Rafa now has a clear haircut and jacket trim. Vehicle roofs, dark side glass, bright windscreens, inset wheels, bumpers, and rear lamps separate the car silhouette at chase distance. KESTREL-1 has skids and a distinct tail, and the staged chase now places visible officers, striped concrete barriers, cones, spike strip, and an independently scaled spotlight beam in the road scene. The chase camera is closer, and its decorative HUD helicopter was removed so it cannot cover the 3D aircraft.
+
+No official screenshot was written or recaptured. On port 18805, `?test=1&seed=1` reports `drive-test ok` with no page exceptions; temporary chase and city renders were checked at 768×480. `MAKEFUN_OUTPUT_DIR=/tmp/g6bout node main.ts` writes `dossier.json` and copies `game/` with exactly the existing four JPEGs. JavaScript syntax and `git diff --check` pass.

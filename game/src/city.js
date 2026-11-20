@@ -8,7 +8,7 @@ import { dressAvenue } from './avenue.js';
 const PALETTE = {
   'Coral Shore': [0xffe4c4, 0xfff8ef, 0xf0a088, 0xf7cbb4],
   'Old Harbor': [0xd2b498, 0xa88870, 0xe4d2bc, 0x7f8e9a],
-  'Neon Strip': [0x554650, 0x614d65, 0x3f4358, 0x4a3e48],
+  'Neon Strip': [0xb77f9a, 0xc09bb7, 0x9299bc, 0xb88ba5],
   'Palm Heights': [0xffe6c2, 0xf4efe4, 0xe4d0a8, 0xd5e4d8],
   'Industrial Docks': [0x9aa2aa, 0x727a82, 0xb4bac0, 0x5c656e],
 };
@@ -16,7 +16,7 @@ const PALETTE = {
 const FLOORS = {
   'Coral Shore': [3, 7],
   'Old Harbor': [2, 5],
-  'Neon Strip': [8, 16],
+  'Neon Strip': [4, 8],
   'Palm Heights': [1, 3],
   'Industrial Docks': [1, 2],
 };
@@ -97,7 +97,7 @@ export function createCity(scene, rng) {
 
   const asphalt = new THREE.Mesh(
     new THREE.PlaneGeometry(cityW + 36, cityD + 36),
-    new THREE.MeshLambertMaterial({ color: 0x46444d }),
+    new THREE.MeshLambertMaterial({ color: 0x625a5b }),
   );
   asphalt.rotation.x = -Math.PI / 2;
   asphalt.position.set(cityW / 2, 0, cityD / 2);
@@ -128,6 +128,8 @@ export function createCity(scene, rng) {
   foam.rotation.x = -Math.PI / 2;
   foam.position.set(cityW / 2, 0.03, -3.4);
   root.add(foam);
+
+  addCoast(root, cityW);
 
   const blocks = [];
   const builds = [];
@@ -180,6 +182,7 @@ export function createCity(scene, rng) {
 
   addMarkings(root, cityW, cityD);
   const glow = addWindows(root, builds);
+  addStorefronts(root, builds);
   addPalms(root, rng, cityW);
   const lamps = addLamps(root);
   addCars(root, rng);
@@ -256,6 +259,110 @@ function addWindows(root, builds) {
     windows: spawnColored(root, BOX, GLOW, spots),
     bands: spawnColored(root, BOX, GLOW, bands),
   };
+}
+
+function addStorefronts(root, builds) {
+  const glass = [];
+  const awnings = [];
+  const trim = [0xe46c50, 0x168d92, 0xd2a24c, 0x71547f, 0x4d7884, 0xf0dfc1];
+  for (let i = 0; i < builds.length; i++) {
+    const b = builds[i];
+    const width = Math.min(4.2, b.bw * 0.56);
+    const z = b.cz + b.bd / 2 + 0.11;
+    const accent = trim[i % trim.length];
+    glass.push([b.cx, 1.15, z, width, 1.4, 0.08, 0x31535a]);
+    awnings.push([b.cx, 2.1, z + 0.06, width + 0.35, 0.28, 0.46, accent]);
+  }
+  const mat = new THREE.MeshLambertMaterial({ color: 0xffffff });
+  spawnColored(root, BOX, mat, glass);
+  spawnColored(root, BOX, mat, awnings);
+}
+
+function addCoast(root, cityW) {
+  const wood = new THREE.MeshLambertMaterial({ color: 0x9b6949 });
+  const pale = new THREE.MeshLambertMaterial({ color: 0xf4dfbd });
+  const dark = new THREE.MeshLambertMaterial({ color: 0x3d5360 });
+  const red = new THREE.MeshLambertMaterial({ color: 0xe87559 });
+  const white = new THREE.MeshLambertMaterial({ color: 0xf6e9d1 });
+  const beachBits = new THREE.Group();
+  const deck = new THREE.Mesh(new THREE.BoxGeometry(7.5, 0.38, 42), wood);
+  deck.position.set(54, 0.24, -23);
+  deck.castShadow = true;
+  beachBits.add(deck);
+  for (let z = -7; z >= -42; z -= 7) {
+    for (const x of [51, 57]) {
+      const post = new THREE.Mesh(new THREE.BoxGeometry(0.35, 1.5, 0.35), wood);
+      post.position.set(x, -0.5, z);
+      beachBits.add(post);
+    }
+  }
+  const rail = new THREE.Mesh(new THREE.BoxGeometry(0.16, 0.7, 37), pale);
+  rail.position.set(50.2, 0.74, -24);
+  beachBits.add(rail);
+  const landing = new THREE.Mesh(new THREE.BoxGeometry(12, 0.55, 7), pale);
+  landing.position.set(54, 0.28, -3.2);
+  beachBits.add(landing);
+
+  const tower = new THREE.Mesh(new THREE.CylinderGeometry(1.05, 1.45, 10.5, 10), white);
+  tower.position.set(cityW - 25, 5.25, -13);
+  tower.castShadow = true;
+  const lantern = new THREE.Mesh(new THREE.CylinderGeometry(1.15, 1.15, 1.2, 8), red);
+  lantern.position.set(cityW - 25, 11.1, -13);
+  const cap = new THREE.Mesh(new THREE.ConeGeometry(1.5, 1.5, 8), dark);
+  cap.position.set(cityW - 25, 12.45, -13);
+  beachBits.add(tower, lantern, cap);
+  const beacon = new THREE.Mesh(new THREE.SphereGeometry(0.32, 8, 6), GLOW);
+  beacon.material = new THREE.MeshBasicMaterial({ color: 0xffe6a1 });
+  beacon.position.set(cityW - 25, 11.1, -13);
+  beachBits.add(beacon);
+  addCoastSign(root, 'SOLANO LIGHT', 'HARBOR BEACON', cityW - 25, 1, -17, 0x254557, 0xffe6a1);
+  addCoastSign(root, 'FERRY CUT', 'BAY PASSENGER LANDING', 54, 2.4, -4.5, 0x174d60, 0xffe4a0);
+
+  const crane = new THREE.Group();
+  const yellow = new THREE.MeshLambertMaterial({ color: 0xd5a64d });
+  const legA = new THREE.Mesh(new THREE.BoxGeometry(0.75, 12, 0.75), yellow);
+  const legB = legA.clone();
+  legA.position.set(-5.3, 6, 0);
+  legB.position.set(5.3, 6, 0);
+  const beam = new THREE.Mesh(new THREE.BoxGeometry(1, 0.85, 15), yellow);
+  beam.position.set(0, 12.1, -2);
+  const boom = new THREE.Mesh(new THREE.BoxGeometry(1, 0.55, 10), yellow);
+  boom.position.set(0, 12.1, -13);
+  const hook = new THREE.Mesh(new THREE.BoxGeometry(0.2, 5, 0.2), dark);
+  hook.position.set(0, 9.4, -15);
+  crane.add(legA, legB, beam, boom, hook);
+  crane.position.set(cityW - 15, 0, 4 * SPAN + 16);
+  crane.castShadow = true;
+  beachBits.add(crane);
+  addCoastSign(root, 'CRANE GATE', 'DOCK NINE', cityW - 18, 7.4, 4 * SPAN + 5, 0x284753, 0xffd27a);
+
+  for (let x = 20; x < cityW - 12; x += 22) {
+    const umbrella = new THREE.Mesh(new THREE.ConeGeometry(1.55, 0.72, 8), red);
+    umbrella.position.set(x, 2.35, -14);
+    umbrella.rotation.x = Math.PI;
+    const pole = new THREE.Mesh(new THREE.CylinderGeometry(0.045, 0.045, 2.2, 5), dark);
+    pole.position.set(x, 1.25, -14);
+    beachBits.add(umbrella, pole);
+    for (const side of [-1, 1]) {
+      const lounger = new THREE.Group();
+      const seat = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 1.65), pale);
+      seat.position.y = 0.55;
+      const back = new THREE.Mesh(new THREE.BoxGeometry(0.72, 0.12, 0.8), pale);
+      back.position.set(0, 0.88, -0.34);
+      back.rotation.x = -0.28;
+      lounger.add(seat, back);
+      lounger.position.set(x + side * 2.1, 0, -14);
+      beachBits.add(lounger);
+    }
+  }
+  root.add(beachBits);
+}
+
+function addCoastSign(root, title, sub, x, y, z, bg, fg) {
+  const sign = makeSign(title, sub, '#' + bg.toString(16).padStart(6, '0'), '#' + fg.toString(16).padStart(6, '0'));
+  sign.scale.setScalar(0.62);
+  sign.position.set(x, y, z);
+  root.add(sign);
 }
 
 function palmGeometry() {
@@ -402,8 +509,9 @@ function addSigns(root) {
   for (let i = 0; i < signs.length; i++) {
     const s = signs[i];
     const sign = makeSign(s[0], s[1], s[2], s[3]);
-    sign.position.set(s[4], 0, s[5]);
-    sign.rotation.y = i === 1 ? 0.6 : i >= 4 ? Math.PI : -0.4;
+    sign.position.set(i === 4 ? 147 : s[4], 0, s[5]);
+    sign.scale.setScalar(i === 4 ? 0.62 : 1);
+    sign.rotation.y = i === 1 ? 0.6 : i === 4 ? 0 : i === 5 ? Math.PI : -0.4;
     root.add(sign);
   }
 }

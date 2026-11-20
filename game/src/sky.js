@@ -4,10 +4,10 @@
 import * as THREE from '../vendor/three.module.min.js';
 import { addGlow } from './glow.js';
 
-const HORIZON = new THREE.Color(0xffd27a);
-const MID = new THREE.Color(0xf06496);
-const ZENITH = new THREE.Color(0x351a78);
-const GROUND = new THREE.Color(0x4e2a58);
+const HORIZON = new THREE.Color(0xffdf8d);
+const MID = new THREE.Color(0xf8799d);
+const ZENITH = new THREE.Color(0x45247e);
+const GROUND = new THREE.Color(0x68465e);
 const SUN_COLOR = new THREE.Color(0xffd7a0);
 
 const NIGHT = {
@@ -22,7 +22,7 @@ const DAY = {
 };
 const SET = {
   h: HORIZON, m: MID, z: ZENITH, g: GROUND,
-  sun: 0xffd7a0, sunI: 1.7, hemi: 0xffc2b0, hemiI: 0.58, ground: 0x5a6a88,
+  sun: 0xffd7a0, sunI: 1.82, hemi: 0xffd1b3, hemiI: 0.66, ground: 0x81708a,
   fog: 0xc46e96,
 };
 

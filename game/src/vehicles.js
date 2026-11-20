@@ -17,9 +17,10 @@ const BOX = new THREE.BoxGeometry(1, 1, 1);
 const WHEEL_GEO = new THREE.CylinderGeometry(0.33, 0.33, 0.22, 8);
 WHEEL_GEO.rotateZ(Math.PI / 2);
 const BODY_GEO = new THREE.CylinderGeometry(0.9, 1, 1, 12, 1);
-const CABIN_GEO = new THREE.CylinderGeometry(0.72, 1, 1, 8, 1);
+const CABIN_GEO = new THREE.BoxGeometry(1, 1, 1);
 const HEAD_GEO = new THREE.SphereGeometry(0.12, 6, 5);
-const GLASS = new THREE.MeshLambertMaterial({ color: 0x8ec4dc });
+const GLASS = new THREE.MeshLambertMaterial({ color: 0x3e6578 });
+const WINDSCREEN = new THREE.MeshLambertMaterial({ color: 0x9ecbd6 });
 const RUBBER = new THREE.MeshLambertMaterial({ color: 0x1a1c20 });
 const SKIN = new THREE.MeshLambertMaterial({ color: 0xd9a27a });
 const SHIRT = new THREE.MeshLambertMaterial({ color: 0x243044 });
@@ -91,9 +92,17 @@ function buildCar(type) {
   const cabinY = 0.55 + H + type.cabinH / 2 - 0.06;
   const cabin = new THREE.Mesh(CABIN_GEO, GLASS);
   cabin.position.set(0, cabinY, type.cabinZ);
-  cabin.scale.set(W * 0.4, type.cabinH, type.cabinL * 0.5);
+  cabin.scale.set(W * 0.78, type.cabinH * 0.86, type.cabinL * 0.82);
   group.add(cabin);
-  group.add(box(bodyMat, 0, cabinY + type.cabinH * 0.43, type.cabinZ, W * 0.58, 0.1, type.cabinL * 0.68));
+  group.add(box(bodyMat, 0, cabinY + type.cabinH * 0.46, type.cabinZ, W * 0.68, 0.1, type.cabinL * 0.72));
+  for (const side of [-1, 1]) {
+    group.add(box(GLASS, side * W * 0.394, cabinY, type.cabinZ, 0.035, type.cabinH * 0.52, type.cabinL * 0.5));
+  }
+  group.add(box(WINDSCREEN, 0, cabinY, type.cabinZ - type.cabinL * 0.41, W * 0.62, type.cabinH * 0.6, 0.035));
+  group.add(box(WINDSCREEN, 0, cabinY, type.cabinZ + type.cabinL * 0.41, W * 0.62, type.cabinH * 0.6, 0.035));
+  group.add(box(bodyMat, 0, bodyY - H * 0.08, -L * 0.29, W * 0.82, H * 0.42, L * 0.23));
+  group.add(box(bodyMat, 0, bodyY - H * 0.08, L * 0.34, W * 0.82, H * 0.42, L * 0.19));
+  group.add(box(RUBBER, 0, 0.43, L * 0.49, W * 0.84, 0.13, 0.12));
   const nose = -L / 2;
   const tail = L / 2;
   group.add(box(headMat, -W * 0.32, bodyY * 0.92, nose - 0.02, 0.28, 0.14, 0.06));

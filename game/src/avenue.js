@@ -84,8 +84,8 @@ function addCrowns(root, list) {
   for (let i = 0; i < list.length; i++) {
     const b = list[i];
     const neon = b.name === 'Neon Strip';
-    const lite = neon ? 0x343c5c : 0xfff3e2;
-    const hot = neon ? (i % 2 ? 0xff3d8e : 0x3ef6e4) : 0xffe2a4;
+    const lite = neon ? 0x71839b : 0xfff3e2;
+    const hot = neon ? (i % 2 ? 0xff579d : 0x58f4db) : 0xffe2a4;
     const k = i % 4;
     if (k === 0) {
       const bw = b.bw * 0.58;
@@ -166,14 +166,14 @@ function addBoards(root, list) {
 
 function addCoverBoards(root) {
   const spots = [
-    ['LAGOON FM', 'GLASS TIDE', '#1a1030', '#5df6e4', 121.5, 8.4, 36],
-    ['REEF SODA', 'COLD AND LOCAL', '#0c4a58', '#ffe08a', 142.5, 9.2, 48],
-    ['TIDE HOTEL', 'ON THE WATER', '#8c2438', '#fff1e4', 122.2, 7.2, 22],
+    ['LAGOON FM', 'GLASS TIDE', '#1a1030', '#5df6e4', 110, 7.1, 36],
+    ['REEF SODA', 'COLD AND LOCAL', '#0c4a58', '#ffe08a', 151, 7.8, 48],
+    ['TIDE HOTEL', 'ON THE WATER', '#8c2438', '#fff1e4', 112, 6.4, 22],
   ];
   for (let i = 0; i < spots.length; i++) {
     const s = spots[i];
     const board = new THREE.Mesh(
-      new THREE.PlaneGeometry(8.4, 3.8),
+      new THREE.PlaneGeometry(5.5, 2.5),
       new THREE.MeshBasicMaterial({ map: boardTex(s[0], s[1], s[2], s[3]), side: THREE.DoubleSide }),
     );
     board.position.set(s[4], s[5], s[6]);

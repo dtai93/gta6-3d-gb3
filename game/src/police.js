@@ -23,6 +23,10 @@ function officerMesh() {
   head.position.y = 1.46;
   const cap = new THREE.Mesh(new THREE.BoxGeometry(0.22, 0.07, 0.22), NAVY_D);
   cap.position.y = 1.58;
+  const brim = new THREE.Mesh(new THREE.BoxGeometry(0.29, 0.035, 0.25), NAVY_D);
+  brim.position.set(0, 1.55, -0.04);
+  const badge = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.16, 0.025), new THREE.MeshBasicMaterial({ color: 0xffd27a }));
+  badge.position.set(-0.09, 1.12, -0.135);
   const legL = new THREE.Group();
   const legR = new THREE.Group();
   legL.position.set(-0.1, 0.72, 0);
@@ -36,19 +40,65 @@ function officerMesh() {
   legR.add(l2);
   const gun = new THREE.Mesh(new THREE.BoxGeometry(0.06, 0.08, 0.22), BLACK);
   gun.position.set(0.22, 1.05, -0.16);
-  mesh.add(body, head, cap, legL, legR, gun);
+  mesh.add(body, head, cap, brim, badge, legL, legR, gun);
   return { mesh, legL, legR };
+}
+
+function roadblockMesh() {
+  const group = new THREE.Group();
+  const concrete = new THREE.MeshLambertMaterial({ color: 0xcac0ad });
+  const hazard = new THREE.MeshLambertMaterial({ color: 0xf0b346 });
+  const black = new THREE.MeshLambertMaterial({ color: 0x242a31 });
+  for (let i = -1; i <= 1; i++) {
+    const barrier = new THREE.Mesh(new THREE.BoxGeometry(3.3, 0.82, 0.78), concrete);
+    barrier.position.set(i * 3.35, 0.41, 0);
+    barrier.castShadow = true;
+    group.add(barrier);
+    for (const face of [-1, 1]) {
+      const stripe = new THREE.Mesh(new THREE.BoxGeometry(2.7, 0.3, 0.035), hazard);
+      stripe.position.set(i * 3.35, 0.52, face * 0.41);
+      stripe.rotation.z = i === 0 ? -0.32 : 0.32;
+      group.add(stripe);
+    }
+  }
+  const strip = new THREE.Mesh(new THREE.BoxGeometry(10.2, 0.12, 0.75), black);
+  strip.position.set(0, 0.08, 3.1);
+  group.add(strip);
+  for (let i = -5; i <= 5; i++) {
+    const tooth = new THREE.Mesh(new THREE.ConeGeometry(0.2, 0.38, 4), hazard);
+    tooth.position.set(i * 0.88, 0.32, 3.1);
+    group.add(tooth);
+  }
+  for (const x of [-5.5, 5.5]) {
+    const cone = new THREE.Mesh(
+      new THREE.ConeGeometry(0.32, 0.9, 7),
+      new THREE.MeshLambertMaterial({ color: 0xff762e }),
+    );
+    cone.position.set(x, 0.45, 1.9);
+    group.add(cone);
+  }
+  return group;
 }
 
 function helicopterMesh() {
   const mesh = new THREE.Group();
-  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x26394e, shininess: 72, specular: 0x9cb4c9 });
+  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x476c7a, shininess: 72, specular: 0xb5d0d5 });
   const glassMat = new THREE.MeshLambertMaterial({ color: 0xb7d4e2 });
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.92, 4.1), bodyMat);
   const tail = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.36, 2.9), bodyMat);
   tail.position.set(0, 0.2, 2.4);
   const fin = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.92, 0.58), bodyMat);
   fin.position.set(0, 0.55, 3.3);
+  const skids = [];
+  for (const side of [-1, 1]) {
+    const skid = new THREE.Mesh(new THREE.BoxGeometry(0.12, 0.12, 3.8), BLACK);
+    skid.position.set(side * 0.75, -0.62, 0.2);
+    const strut = new THREE.Mesh(new THREE.BoxGeometry(0.1, 0.58, 0.12), BLACK);
+    strut.position.set(side * 0.75, -0.36, -0.5);
+    const rearStrut = strut.clone();
+    rearStrut.position.z = 1.25;
+    skids.push(skid, strut, rearStrut);
+  }
   const rotor = new THREE.Mesh(new THREE.BoxGeometry(9.2, 0.11, 0.52), BLACK);
   rotor.add(new THREE.Mesh(new THREE.BoxGeometry(0.52, 0.11, 9.2), BLACK));
   rotor.position.y = 0.55;
@@ -67,7 +117,7 @@ function helicopterMesh() {
   }));
   addGlow(red, 0, 0, 0, 0xff2430, 1.6);
   addGlow(blue, 0, 0, 0, 0x3d7bff, 1.6);
-  mesh.add(body, tail, fin, rotor, tailRotor, glass, red, blue, beam);
+  mesh.add(body, tail, fin, ...skids, rotor, tailRotor, glass, red, blue, beam);
   const spot = new THREE.SpotLight(0xfff4d2, 0, 96, 0.42, 0.5, 0.85);
   spot.position.set(0, -0.2, 0.2);
   const target = new THREE.Object3D();
@@ -116,8 +166,11 @@ export function createPolice(scene) {
   scene.add(heli.mesh);
   scene.add(heli.target);
   heli.spot.target = heli.target;
+  const roadblock = roadblockMesh();
+  roadblock.visible = false;
+  scene.add(roadblock);
   return {
-    units, officers, heli, callsign: 'KESTREL-1',
+    units, officers, heli, roadblock, callsign: 'KESTREL-1',
     hx: SPAN * 3, hz: SPAN * 2, hy: 24, bust: 0, playerHit: 0,
   };
 }
@@ -344,11 +397,14 @@ function placeUnit(car, x, z, yaw, role, time) {
 // Frozen screenshot poses. Chase puts three cruisers and KESTREL-1 around the camera.
 export function stagePolice(police, shot, x, z, yaw) {
   const time = 0.18;
+  police.roadblock.visible = shot === 'chase';
   if (shot === 'chase') {
     // yaw is the avenue, not the hero's drift. Cops sit beside and just behind.
     yawForward(yaw, _fwd);
     const rx = -_fwd.z;
     const rz = _fwd.x;
+    police.roadblock.position.set(x + _fwd.x * 14, 0, z + _fwd.z * 14);
+    police.roadblock.rotation.y = yaw;
     const cops = [
       { s: -4.3, b: 0.35, turn: 0.12, role: 'chase', t: 0.02 },
       { s: 4.4, b: 0.7, turn: -0.1, role: 'ram', t: 0.16 },
@@ -361,15 +417,30 @@ export function stagePolice(police, shot, x, z, yaw) {
       placeUnit(police.units[i], px, pz, yaw + c.turn, c.role, c.t);
     }
     for (let i = 3; i < police.units.length; i++) police.units[i].mesh.visible = false;
-    for (let i = 0; i < police.officers.length; i++) {
+    const onScene = [
+      { i: 0, side: -5.8, forward: 10.8 },
+      { i: 1, side: 5.8, forward: 10.8 },
+    ];
+    for (const spot of onScene) {
+      const cop = police.officers[spot.i];
+      cop.x = x + _fwd.x * spot.forward + rx * spot.side;
+      cop.z = z + _fwd.z * spot.forward + rz * spot.side;
+      cop.yaw = yawFromDir(x - cop.x, z - cop.z);
+      cop.active = true;
+      cop.mesh.visible = true;
+      cop.mesh.position.set(cop.x, 0, cop.z);
+      cop.mesh.rotation.set(0, cop.yaw, 0);
+    }
+    for (let i = 2; i < police.officers.length; i++) {
       police.officers[i].active = false;
       police.officers[i].mesh.visible = false;
     }
-    police.hx = x + rx * 9.5;
-    police.hz = z - 14;
-    police.hy = 30;
+    police.hx = x + rx * 3;
+    police.hz = z - 24;
+    police.hy = 5.2;
     police.heli.mesh.visible = true;
-    police.heli.mesh.scale.setScalar(5.2);
+    police.heli.mesh.scale.setScalar(1.5);
+    police.heli.beam.scale.setScalar(1 / 1.5);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
     police.heli.mesh.rotation.y = yaw + 0.85;
     police.heli.rotor.rotation.y = 0.7;
@@ -407,6 +478,7 @@ export function stagePolice(police, shot, x, z, yaw) {
     police.hy = 14.5;
     police.heli.mesh.visible = true;
     police.heli.mesh.scale.setScalar(1.6);
+    police.heli.beam.scale.setScalar(1 / 1.6);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
     police.heli.mesh.rotation.y = yaw + 0.5;
     police.heli.rotor.rotation.y = 0.85;
