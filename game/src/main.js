@@ -39,7 +39,7 @@ const params = new URLSearchParams(location.search);
 const shotName = params.get('shot');
 const seed = Number(params.get('seed') || '1') || 1;
 const shot = SHOTS[shotName] || null;
-const wide = shotName === 'city' || shotName === 'start';
+const wide = shotName === 'city' || shotName === 'start' || shotName === 'map';
 const testing = params.get('test') === '1';
 const baseFov = wide ? 48 : 58;
 
@@ -77,7 +77,9 @@ const dialogue = createDialogue();
 const radio = createRadio();
 const toast = { text: '', t: 0 };
 let respect = createRespect();
-let activities = createActivities();
+let activities = createActivities(shotName === 'map'
+  ? { jobsDone: 2, carsStolen: 4, heatEscaped: 1, distanceKm: 16.8, racesWon: 1, bestRace: 184.6 }
+  : {});
 const crew = createCrew();
 const race = createRace();
 let driven = null;
@@ -615,7 +617,14 @@ menus.onGarageAction = (serviceId) => {
   toast.t = result.ok ? 2.8 : 2;
   refreshGarage();
 };
-if (playing) menus.showPlay();
+if (playing && shotName === 'map') {
+  menus.saves = [
+    { day: 2, district: 'Coral Shore', cash: 2460 },
+    { day: 3, district: 'Old Harbor', cash: 6240 },
+    null,
+  ];
+  menus.showMap();
+} else if (playing) menus.showPlay();
 else menus.showTitle(shotName === 'start' ? [shotPreview(), null, null] : readSaves());
 savedClear = missions.cleared;
 heardShot = combat.loadout.shot;
@@ -770,7 +779,7 @@ function tick(now) {
     radio: track,
     notice: toast.t > 0 ? toast.text : '',
     crosshair: shotName === 'onfoot' || (live && !driven && combat.vitals.state === 'ok'),
-    wheel: shotName === 'onfoot',
+    wheel: shotName === 'onfoot' && !shot,
   });
   if (menus.mode === 'map') {
     drawWorldMap(menus.mapCanvas, {

@@ -117,8 +117,10 @@ function stageChase(world, shot) {
     if (Math.hypot(car.x - shot.x, car.z - shot.z) < 18) car.mesh.visible = false;
   }
   stagePolice(world.police, 'chase', shot.x, shot.z, shot.yaw);
-  world.police.officers[0].active = false;
-  world.police.officers[0].mesh.visible = false;
+  for (const officer of world.police.officers) {
+    officer.active = false;
+    officer.mesh.visible = false;
+  }
   driftFx(world.scene, shot.x, shot.z, shot.face);
   placePed(peds.list[0], shot.x - 7.2, shot.z - 13, shot.face + 1.5);
   placePed(peds.list[1], shot.x + 7.4, shot.z - 17, shot.face - 1.5);
@@ -291,10 +293,11 @@ function stageCity(world, shot) {
 }
 
 function stageDocklineRace(world, shot) {
-  const { combat, radio, respect, crew, race } = world;
+  const { combat, radio, respect, crew, race, missions, peds } = world;
   const ride = drive(world, 0, shot, 26, 0.8);
   ride.steer = 0.12;
   stageRace(race);
+  stageMission(missions, 'chase');
   combat.vitals.cash = 3180;
   combat.vitals.health = 100;
   combat.vitals.armour = 40;
@@ -304,7 +307,22 @@ function stageDocklineRace(world, shot) {
   crew.cooldowns[1] = 12;
   crew.cooldowns[2] = 0;
   radio.index = 4;
+  placePed(peds.list[0], shot.x - 6, shot.z - 10, shot.face + 1.4);
+  placePed(peds.list[1], shot.x + 7, shot.z - 15, shot.face - 1.3);
+  park(world, 1, shot.x - 4, shot.z - 22, shot.face);
+  park(world, 4, shot.x + 4, shot.z - 33, shot.face);
   return ride;
+}
+
+function stageMap(world) {
+  const { missions, respect, crew } = world;
+  stageMission(missions, 'chase');
+  respect.rp = 2870;
+  crew.selected = 1;
+  crew.cooldowns[0] = 0;
+  crew.cooldowns[1] = 0;
+  crew.cooldowns[2] = 0;
+  return null;
 }
 
 // Returns the driven car when the pose is in a vehicle. Start stays on the title card.
@@ -317,5 +335,6 @@ export function applyShot(name, world) {
   else if (name === 'onfoot') driven = stageOnFoot(world, shot);
   else if (name === 'city') driven = stageCity(world, shot);
   else if (name === 'race') driven = stageDocklineRace(world, shot);
+  else if (name === 'map') driven = stageMap(world);
   return { driven };
 }

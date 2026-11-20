@@ -50,7 +50,7 @@ node serve.ts
 
 Open the printed address in desktop Chrome. Keyboard and mouse. No build step and no network.
 
-Screenshot scenes freeze a staged moment: `/?shot=chase&seed=1`, `onfoot`, `city`, or `start`.
+Screenshot scenes freeze a staged moment: `/?shot=chase&seed=1`, `onfoot`, `race`, or `map`.
 
 [![make.fun · gta6-01](https://make.fun/badge/gta6-01.svg)](https://make.fun/bounty/gta6-01?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)
 [![rank](https://make.fun/badge/gta6-01/dtai93/gta6-3d-gb3/rank.svg)](https://make.fun/bounty/gta6-01/leaderboard?utm_source=github&utm_medium=readme&utm_campaign=gta6-01)

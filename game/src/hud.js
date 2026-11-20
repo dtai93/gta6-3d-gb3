@@ -1,4 +1,4 @@
-// DOM overlay: mission, wanted, cash, clock, police, minimap, vitals, radio, dialogue.
+// DOM overlay: mission, wanted, cash, clock, career, crew, police, minimap, vitals, radio, dialogue.
 import { GRID_X, GRID_Z, SPAN } from './config.js';
 import { paintPortrait } from './dialogue.js';
 import { ACTIVITIES } from './activities.js';

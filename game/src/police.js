@@ -82,8 +82,8 @@ function roadblockMesh() {
 
 function helicopterMesh() {
   const mesh = new THREE.Group();
-  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x476c7a, shininess: 72, specular: 0xb5d0d5 });
-  const glassMat = new THREE.MeshLambertMaterial({ color: 0xb7d4e2 });
+  const bodyMat = new THREE.MeshPhongMaterial({ color: 0x73949a, shininess: 72, specular: 0xc5e4e6, emissive: 0x172b32 });
+  const glassMat = new THREE.MeshLambertMaterial({ color: 0xd7f0f3, emissive: 0x294854 });
   const body = new THREE.Mesh(new THREE.BoxGeometry(1.9, 0.92, 4.1), bodyMat);
   const tail = new THREE.Mesh(new THREE.BoxGeometry(0.38, 0.36, 2.9), bodyMat);
   tail.position.set(0, 0.2, 2.4);
@@ -437,16 +437,16 @@ export function stagePolice(police, shot, x, z, yaw) {
     }
     police.hx = x + rx * 3;
     police.hz = z - 24;
-    police.hy = 5.2;
+    police.hy = 7.2;
     police.heli.mesh.visible = true;
-    police.heli.mesh.scale.setScalar(1.5);
-    police.heli.beam.scale.setScalar(1 / 1.5);
+    police.heli.mesh.scale.setScalar(1.9);
+    police.heli.beam.scale.setScalar(1 / 1.9);
     police.heli.mesh.position.set(police.hx, police.hy, police.hz);
     police.heli.mesh.rotation.y = yaw + 0.85;
     police.heli.rotor.rotation.y = 0.7;
     police.heli.beam.visible = true;
     police.heli.beam.rotation.x = -0.38;
-    police.heli.beam.material.opacity = 0.34;
+    police.heli.beam.material.opacity = 0.48;
     police.heli.spot.intensity = 10;
     police.heli.target.position.set(x, 0.5, z);
     police.bust = 0.4;

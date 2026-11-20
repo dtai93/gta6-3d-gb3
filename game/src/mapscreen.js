@@ -5,7 +5,7 @@ import { ACTIVITIES } from './activities.js';
 import { DOCK_CREW } from './crew.js';
 
 const MARKS = [
-  [1, 0, 'CORAL SHORE'],
+  [1, 1, 'CORAL SHORE'],
   [4, 0, 'OLD HARBOR'],
   [3, 2, 'NEON STRIP'],
   [0, 4, 'PALM HEIGHTS'],
@@ -65,7 +65,8 @@ export function drawWorldMap(canvas, s) {
   for (const activity of ACTIVITIES) {
     const p = P(activity.x, activity.z);
     const story = activity.kind === 'STORY';
-    if (story) { p[0] += 14; p[1] -= 14; }
+    if (activity.kind === 'SAFEHOUSE') { p[0] -= 11; p[1] += 12; }
+    else if (story) { p[0] += 15; p[1] -= 15; }
     ctx.fillStyle = activity.kind === 'SAFEHOUSE' ? '#ffc14a' : activity.kind === 'RACE' ? '#74e5d3' : story ? '#d9b7ff' : '#f4986a';
     ctx.strokeStyle = '#12232a';
     ctx.lineWidth = 3;
@@ -77,9 +78,10 @@ export function drawWorldMap(canvas, s) {
     ctx.font = '900 11px sans-serif';
     ctx.fillText(activity.kind === 'SAFEHOUSE' ? 'H' : activity.kind === 'RACE' ? 'R' : story ? 'C' : 'G', p[0], p[1] + 4);
     ctx.fillStyle = '#fff4df';
-    ctx.font = '800 11px sans-serif';
-    ctx.textAlign = 'left';
-    ctx.fillText(story ? 'CONTACT' : activity.kind, p[0] + 13, p[1] + 4);
+    ctx.font = '800 13px sans-serif';
+    ctx.textAlign = activity.kind === 'SAFEHOUSE' ? 'right' : 'left';
+    const labelX = activity.kind === 'SAFEHOUSE' ? p[0] - 13 : p[0] + 13;
+    ctx.fillText(story ? 'CONTACT' : activity.kind, labelX, p[1] + 4);
     ctx.textAlign = 'center';
   }
   const job = s.mission;
@@ -128,7 +130,7 @@ export function drawWorldMap(canvas, s) {
   ctx.fillText('PORT SOLANO', 30, 42);
   ctx.font = '800 15px sans-serif';
   ctx.fillStyle = '#ffd27a';
-  ctx.fillText('MAP + CAREER  ·  M OR ESC CLOSES', 30, 67);
+  ctx.fillText('PAUSE MAP + STATS  ·  M OR ESC CLOSES', 30, 67);
   ctx.font = '800 14px sans-serif';
   ctx.fillStyle = '#bce6e4';
   ctx.fillText((s.district || '').toUpperCase() + '  ·  RAFA QUILL', 30, 91);
@@ -136,7 +138,7 @@ export function drawWorldMap(canvas, s) {
   const sx = mapW + 24;
   const sw = w - sx - 20;
   ctx.fillStyle = '#ffc14a';
-  ctx.font = '900 17px sans-serif';
+  ctx.font = '900 19px sans-serif';
   ctx.fillText('WATERFRONT RESPECT', sx, 42);
   ctx.fillStyle = '#fff8ee';
   ctx.font = '900 21px sans-serif';
@@ -163,7 +165,7 @@ export function drawWorldMap(canvas, s) {
     ctx.textAlign = 'right';
     ctx.fillText(value, sx + sw, sy);
     ctx.textAlign = 'left';
-    sy += 37;
+    sy += 38;
   }
   sy += 8;
   ctx.strokeStyle = 'rgba(255,255,255,0.18)';
@@ -173,41 +175,41 @@ export function drawWorldMap(canvas, s) {
   ctx.stroke();
   sy += 28;
   ctx.fillStyle = '#ffc14a';
-  ctx.font = '900 15px sans-serif';
+  ctx.font = '900 17px sans-serif';
   ctx.fillText('STORY CHECKLIST', sx, sy);
   sy += 23;
   for (let i = 0; i < s.missions.length; i++) {
     const done = i < s.cleared;
     ctx.fillStyle = done ? '#8de0ad' : '#e5ddd0';
-    ctx.font = '700 12px sans-serif';
+    ctx.font = '700 14px sans-serif';
     ctx.fillText((done ? '✓ ' : '○ ') + s.missions[i], sx, sy);
-    sy += 20;
+    sy += 22;
   }
   sy += 9;
   ctx.fillStyle = '#72d9d2';
-  ctx.font = '900 15px sans-serif';
+  ctx.font = '900 17px sans-serif';
   ctx.fillText('DOCK CREW  ·  C CALLS NEXT FAVOR', sx, sy);
   sy += 23;
   for (const member of DOCK_CREW) {
     ctx.fillStyle = '#fff8ee';
-    ctx.font = '800 12px sans-serif';
+    ctx.font = '800 14px sans-serif';
     ctx.fillText(member.name.toUpperCase() + '  /  ' + member.ability.toUpperCase(), sx, sy);
-    sy += 20;
+    sy += 22;
   }
   sy += 8;
   ctx.fillStyle = '#ffc14a';
-  ctx.font = '900 15px sans-serif';
+  ctx.font = '900 17px sans-serif';
   ctx.fillText('SAVE SLOTS  ·  PAUSE TO WRITE', sx, sy);
   sy += 23;
   for (let i = 0; i < s.saveSlots.length; i++) {
     const save = s.saveSlots[i];
     ctx.fillStyle = save ? '#e5ddd0' : '#91a2a4';
-    ctx.font = '700 11px sans-serif';
+    ctx.font = '700 13px sans-serif';
     const label = save
       ? 'SLOT ' + (i + 1) + '  ·  DAY ' + save.day + '  ·  ' + (save.district || 'PORT SOLANO') + '  ·  $' + Math.floor(save.cash)
       : 'SLOT ' + (i + 1) + '  ·  EMPTY';
     ctx.fillText(label, sx, sy);
-    sy += 18;
+    sy += 21;
   }
   ctx.fillStyle = '#ffd7b0';
   ctx.font = '700 12px sans-serif';
